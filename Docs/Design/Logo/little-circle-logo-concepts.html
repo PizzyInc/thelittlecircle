@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Little Circle — Logo Concepts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #1a1a1a;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+        }
+
+        .section {
+            max-width: 1000px;
+            margin: 0 auto 60px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Logo Display Grid */
+        .logo-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .logo-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            min-width: 180px;
+        }
+
+        .logo-card.dark {
+            background: #1a1a1a;
+        }
+
+        .logo-label {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .logo-card.dark .logo-label {
+            color: #999;
+        }
+
+        /* ============================================
+           THE FACE LOGO - PRIMARY
+           ============================================ */
+
+        .logo-face {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        /* Style A: Warm Peach (Primary) */
+        .logo-face.peach {
+            background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%);
+            box-shadow:
+                0 4px 20px rgba(255, 180, 150, 0.4);
+        }
+
+        /* Style B: Soft gradient with subtle border */
+        .logo-face.peach-border {
+            background: linear-gradient(145deg, #fff0e8 0%, #ffe0d0 100%);
+            box-shadow:
+                0 4px 20px rgba(255, 180, 150, 0.3),
+                inset 0 0 0 2px rgba(255, 180, 150, 0.3);
+        }
+
+        /* Style C: Flat peach */
+        .logo-face.peach-flat {
+            background: #ffd9c8;
+        }
+
+        /* Style D: White face (for dark backgrounds) */
+        .logo-face.white {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style G: Pure White (flat) */
+        .logo-face.white-flat {
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        /* Style H: Black face (for light backgrounds) */
+        .logo-face.black {
+            background: #1a1a1a;
+        }
+
+        .logo-face.black .logo-eye {
+            background: #ffffff;
+        }
+
+        .logo-face.black .logo-eye::after {
+            background: #1a1a1a;
+        }
+
+        /* Style I: Black outline only */
+        .logo-face.outline-black {
+            background: transparent;
+            border: 3px solid #1a1a1a;
+            box-shadow: none;
+        }
+
+        .logo-face.outline-black .logo-eye {
+            background: #1a1a1a;
+        }
+
+        .logo-face.outline-black .logo-eye::after {
+            background: transparent;
+        }
+
+        /* Style J: White outline only */
+        .logo-face.outline-white {
+            background: transparent;
+            border: 3px solid #ffffff;
+            box-shadow: none;
+        }
+
+        .logo-face.outline-white .logo-eye {
+            background: #ffffff;
+        }
+
+        .logo-face.outline-white .logo-eye::after {
+            background: transparent;
+        }
+
+        /* Style E: Lavender alternative */
+        .logo-face.lavender {
+            background: linear-gradient(145deg, #ece4f4 0%, #ddd0f0 100%);
+            box-shadow: 0 4px 20px rgba(180, 150, 220, 0.4);
+        }
+
+        /* Style F: Mint alternative */
+        .logo-face.mint {
+            background: linear-gradient(145deg, #d8f7ed 0%, #bef0dc 100%);
+            box-shadow: 0 4px 20px rgba(120, 200, 170, 0.4);
+        }
+
+        .logo-eye {
+            width: 12px;
+            height: 12px;
+            background: #2c2c2c;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .logo-eye::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+        }
+
+        /* Smaller sizes */
+        .logo-face.small {
+            width: 48px;
+            height: 48px;
+            gap: 10px;
+        }
+
+        .logo-face.small .logo-eye {
+            width: 8px;
+            height: 8px;
+        }
+
+        .logo-face.small .logo-eye::after {
+            width: 3px;
+            height: 3px;
+            top: 1px;
+            left: 1px;
+        }
+
+        .logo-face.tiny {
+            width: 32px;
+            height: 32px;
+            gap: 7px;
+        }
+
+        .logo-face.tiny .logo-eye {
+            width: 6px;
+            height: 6px;
+        }
+
+        .logo-face.tiny .logo-eye::after {
+            width: 2px;
+            height: 2px;
+            top: 1px;
+            left: 1px;
+        }
+
+        .logo-face.micro {
+            width: 20px;
+            height: 20px;
+            gap: 4px;
+        }
+
+        .logo-face.micro .logo-eye {
+            width: 4px;
+            height: 4px;
+        }
+
+        .logo-face.micro .logo-eye::after {
+            display: none;
+        }
+
+        /* ============================================
+           WORDMARK COMBINATIONS
+           ============================================ */
+
+        .wordmark-combo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .wordmark-combo.vertical {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .wordmark {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .wordmark.light {
+            color: #ffffff;
+        }
+
+        .wordmark span {
+            font-weight: 400;
+            color: #888;
+        }
+
+        .wordmark.light span {
+            color: #aaa;
+        }
+
+        /* ============================================
+           APP ICON MOCKUPS
+           ============================================ */
+
+        .app-icons-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .app-icon-container {
+            text-align: center;
+        }
+
+        .app-icon {
+            border-radius: 22%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .app-icon.ios {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .app-icon.ios .logo-face {
+            background: transparent;
+            box-shadow: none;
+            width: 100%;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .app-icon.ios .logo-eye {
+            width: 18px;
+            height: 18px;
+        }
+
+        .app-icon.ios .logo-eye::after {
+            width: 6px;
+            height: 6px;
+            top: 3px;
+            left: 3px;
+        }
+
+        .app-icon.android {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .app-icon.android .logo-face {
+            background: transparent;
+            box-shadow: none;
+            width: 100%;
+            height: 100%;
+            gap: 18px;
+        }
+
+        .app-icon.android .logo-eye {
+            width: 16px;
+            height: 16px;
+        }
+
+        .app-icon.android .logo-eye::after {
+            width: 5px;
+            height: 5px;
+            top: 3px;
+            left: 3px;
+        }
+
+        .app-icon-label {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* ============================================
+           CONTEXT MOCKUPS
+           ============================================ */
+
+        .context-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+        }
+
+        .browser-bar {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .browser-url {
+            flex: 1;
+            background: white;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .favicon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .social-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .social-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .social-handle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* ============================================
+           COLOR PALETTE
+           ============================================ */
+
+        .palette-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .color-chip {
+            text-align: center;
+        }
+
+        .chip {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chip.c1 { background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%); }
+        .chip.c2 { background: #2c2c2c; }
+        .chip.c3 { background: #ffffff; }
+        .chip.c4 { background: #ff9500; }
+        .chip.c5 { background: #34c759; }
+
+        .chip-label {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .chip-hex {
+            font-size: 0.7rem;
+            color: #aaa;
+            font-family: monospace;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: #999;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Little Circle</h1>
+    <p class="subtitle">Logo Concepts</p>
+
+    <!-- Primary Logo -->
+    <div class="section">
+        <h2 class="section-title">Primary Logo — The Face</h2>
+        <div class="logo-grid">
+            <div class="logo-card dark" style="min-width: 220px;">
+                <div class="logo-face white-flat" style="width: 100px; height: 100px; gap: 20px;">
+                    <div class="logo-eye" style="width: 15px; height: 15px;"></div>
+                    <div class="logo-eye" style="width: 15px; height: 15px;"></div>
+                </div>
+                <div class="logo-label">White Solid<br><strong>(Primary Logo)</strong></div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face black">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Black Solid<br>(Light backgrounds)</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face peach">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Warm Peach<br>(In-app companion)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Black & White Versions -->
+    <div class="section">
+        <h2 class="section-title">Black & White Versions</h2>
+        <div class="logo-grid">
+            <div class="logo-card">
+                <div class="logo-face black">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Black Solid</div>
+            </div>
+
+            <div class="logo-card dark">
+                <div class="logo-face white-flat">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">White Solid</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face outline-black">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Black Outline</div>
+            </div>
+
+            <div class="logo-card dark">
+                <div class="logo-face outline-white">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">White Outline</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Alternatives -->
+    <div class="section">
+        <h2 class="section-title">Color Alternatives</h2>
+        <div class="logo-grid">
+            <div class="logo-card">
+                <div class="logo-face peach">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Peach (Primary)</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face lavender">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Lavender</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face mint">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Mint</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sizes -->
+    <div class="section">
+        <h2 class="section-title">Size Variations</h2>
+        <div class="logo-grid">
+            <div class="logo-card">
+                <div class="logo-face peach">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Large (80px)</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face peach small">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Medium (48px)</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face peach tiny">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Small (32px)</div>
+            </div>
+
+            <div class="logo-card">
+                <div class="logo-face peach micro">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="logo-label">Micro (20px)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wordmark Combinations -->
+    <div class="section">
+        <h2 class="section-title">Logo + Wordmark</h2>
+        <div class="logo-grid">
+            <div class="logo-card" style="min-width: 280px;">
+                <div class="wordmark-combo">
+                    <div class="logo-face peach small">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                    <div class="wordmark">The Little Circle</div>
+                </div>
+                <div class="logo-label">Horizontal</div>
+            </div>
+
+            <div class="logo-card" style="min-width: 200px;">
+                <div class="wordmark-combo vertical">
+                    <div class="logo-face peach">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                    <div class="wordmark">The Little Circle</div>
+                </div>
+                <div class="logo-label">Stacked</div>
+            </div>
+
+            <div class="logo-card dark" style="min-width: 280px;">
+                <div class="wordmark-combo">
+                    <div class="logo-face peach small">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                    <div class="wordmark light">The Little Circle</div>
+                </div>
+                <div class="logo-label">Dark Background</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Icons -->
+    <div class="section">
+        <h2 class="section-title">App Icons</h2>
+        <div class="app-icons-row">
+            <div class="app-icon-container">
+                <div class="app-icon ios">
+                    <div class="logo-face">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                </div>
+                <div class="app-icon-label">iOS App Icon</div>
+            </div>
+
+            <div class="app-icon-container">
+                <div class="app-icon android">
+                    <div class="logo-face">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                </div>
+                <div class="app-icon-label">Android Icon</div>
+            </div>
+
+            <div class="app-icon-container">
+                <div class="logo-face peach small">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="app-icon-label">Favicon (48px)</div>
+            </div>
+
+            <div class="app-icon-container">
+                <div class="logo-face peach tiny">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="app-icon-label">Favicon (32px)</div>
+            </div>
+
+            <div class="app-icon-container">
+                <div class="logo-face peach micro">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div class="app-icon-label">Favicon (16px)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context: Browser -->
+    <div class="section">
+        <h2 class="section-title">In Context</h2>
+        <div class="context-section">
+            <div class="browser-bar">
+                <div class="browser-dots">
+                    <div class="browser-dot"></div>
+                    <div class="browser-dot"></div>
+                    <div class="browser-dot"></div>
+                </div>
+                <div class="browser-url">
+                    <div class="logo-face peach micro favicon">
+                        <div class="logo-eye"></div>
+                        <div class="logo-eye"></div>
+                    </div>
+                    thelittlecircle.com
+                </div>
+            </div>
+
+            <div class="social-header">
+                <div class="logo-face peach small">
+                    <div class="logo-eye"></div>
+                    <div class="logo-eye"></div>
+                </div>
+                <div>
+                    <div class="social-name">The Little Circle</div>
+                    <div class="social-handle">@thelittlecircle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Colors -->
+    <div class="section">
+        <h2 class="section-title">Brand Colors</h2>
+        <div class="palette-row">
+            <div class="color-chip">
+                <div class="chip c1"></div>
+                <div class="chip-label">Peach</div>
+                <div class="chip-hex">#FFD4C4</div>
+            </div>
+            <div class="color-chip">
+                <div class="chip c2"></div>
+                <div class="chip-label">Eyes</div>
+                <div class="chip-hex">#2C2C2C</div>
+            </div>
+            <div class="color-chip">
+                <div class="chip c3"></div>
+                <div class="chip-label">White</div>
+                <div class="chip-hex">#FFFFFF</div>
+            </div>
+            <div class="color-chip">
+                <div class="chip c4"></div>
+                <div class="chip-label">AI Alert</div>
+                <div class="chip-hex">#FF9500</div>
+            </div>
+            <div class="color-chip">
+                <div class="chip c5"></div>
+                <div class="chip-label">Real/Safe</div>
+                <div class="chip-hex">#34C759</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        The Little Circle — thelittlecircle.com<br>
+        Logo Concepts — October 2026
+    </div>
+</body>
+</html>

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Little Circle — Friendly Concepts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #2c2c2c;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            max-width: 1100px;
+            margin: 0 auto 70px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #888;
+            margin-top: -20px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .concepts-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .concept-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            min-width: 200px;
+        }
+
+        .concept-label {
+            margin-top: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .concept-sublabel {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        /* ============================================
+           CONCEPT 1: TWO EYES - CUTE FACE
+           ============================================ */
+
+        .face-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* Style A: Warm Peach */
+        .face-peach {
+            background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%);
+            box-shadow:
+                0 6px 25px rgba(255, 180, 150, 0.4),
+                inset 0 -3px 8px rgba(255, 150, 120, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Style B: Soft Lavender */
+        .face-lavender {
+            background: linear-gradient(145deg, #e8e0f0 0%, #d8ccec 100%);
+            box-shadow:
+                0 6px 25px rgba(180, 150, 220, 0.4),
+                inset 0 -3px 8px rgba(150, 120, 200, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Style C: Mint */
+        .face-mint {
+            background: linear-gradient(145deg, #d4f5e9 0%, #b8edd8 100%);
+            box-shadow:
+                0 6px 25px rgba(120, 200, 170, 0.4),
+                inset 0 -3px 8px rgba(100, 180, 150, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Style D: Warm Cream */
+        .face-cream {
+            background: linear-gradient(145deg, #fff8e8 0%, #ffefcc 100%);
+            box-shadow:
+                0 6px 25px rgba(230, 200, 130, 0.4),
+                inset 0 -3px 8px rgba(220, 180, 100, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .cute-eye {
+            width: 14px;
+            height: 14px;
+            background: #2c2c2c;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .cute-eye::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+        }
+
+        /* Blinking animation */
+        .blink .cute-eye {
+            animation: blink 4s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        /* Breathing animation */
+        .breathe {
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Looking around */
+        .look-around .cute-eye {
+            animation: lookAround 3s ease-in-out infinite;
+        }
+
+        @keyframes lookAround {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(3px); }
+            75% { transform: translateX(-3px); }
+        }
+
+        /* ============================================
+           CONCEPT 2: THE BLOB
+           ============================================ */
+
+        .blob {
+            width: 80px;
+            height: 72px;
+            margin: 4px auto 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .blob-peach {
+            background: linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%);
+            border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+            box-shadow:
+                0 8px 25px rgba(255, 180, 150, 0.5),
+                inset 0 -4px 10px rgba(255, 150, 120, 0.25),
+                inset 0 4px 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .blob-lavender {
+            background: linear-gradient(145deg, #ece4f4 0%, #ddd0f0 100%);
+            border-radius: 45% 55% 52% 48% / 50% 52% 48% 50%;
+            box-shadow:
+                0 8px 25px rgba(180, 150, 220, 0.5),
+                inset 0 -4px 10px rgba(150, 120, 200, 0.25),
+                inset 0 4px 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .blob-mint {
+            background: linear-gradient(145deg, #d8f7ed 0%, #bef0dc 100%);
+            border-radius: 52% 48% 48% 52% / 48% 55% 45% 52%;
+            box-shadow:
+                0 8px 25px rgba(120, 200, 170, 0.5),
+                inset 0 -4px 10px rgba(100, 180, 150, 0.25),
+                inset 0 4px 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .blob-eye {
+            width: 12px;
+            height: 14px;
+            background: #2c2c2c;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .blob-eye::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 2px;
+        }
+
+        /* Squish animation */
+        .squish {
+            animation: squish 2s ease-in-out infinite;
+        }
+
+        @keyframes squish {
+            0%, 100% {
+                transform: scale(1, 1);
+                border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+            }
+            50% {
+                transform: scale(1.04, 0.96);
+                border-radius: 52% 48% 48% 52% / 50% 50% 50% 50%;
+            }
+        }
+
+        /* Bounce animation */
+        .bounce {
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* ============================================
+           STATES SECTION
+           ============================================ */
+
+        .states-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .states-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .state-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
+        .state-name {
+            font-weight: 600;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .state-desc {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        /* Idle - happy, calm */
+        .state-idle .face-circle {
+            animation: breathe 3s ease-in-out infinite;
+        }
+        .state-idle .cute-eye {
+            animation: blink 4s ease-in-out infinite;
+        }
+
+        /* Scanning - curious, looking */
+        .state-scanning .face-circle {
+            background: linear-gradient(145deg, #e0eaff 0%, #c8d8ff 100%);
+            box-shadow:
+                0 6px 25px rgba(100, 140, 255, 0.4),
+                inset 0 -3px 8px rgba(80, 120, 220, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+        .state-scanning .cute-eye {
+            animation: lookAroundFast 1s ease-in-out infinite;
+        }
+
+        @keyframes lookAroundFast {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(4px) translateY(-2px); }
+            50% { transform: translateX(-3px) translateY(2px); }
+            75% { transform: translateX(2px) translateY(-1px); }
+        }
+
+        /* AI Detected - worried, alert */
+        .state-ai .face-circle {
+            background: linear-gradient(145deg, #ffe8d8 0%, #ffd4b8 100%);
+            box-shadow:
+                0 6px 30px rgba(255, 150, 80, 0.5),
+                inset 0 -3px 8px rgba(255, 130, 60, 0.25),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+            animation: worry 0.5s ease-in-out infinite;
+        }
+        .state-ai .cute-eye {
+            width: 16px;
+            height: 16px;
+        }
+
+        @keyframes worry {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        /* Real - happy, relieved */
+        .state-real .face-circle {
+            background: linear-gradient(145deg, #d8f5e8 0%, #b8f0d4 100%);
+            box-shadow:
+                0 6px 25px rgba(80, 200, 140, 0.5),
+                inset 0 -3px 8px rgba(60, 180, 120, 0.2),
+                inset 0 3px 8px rgba(255, 255, 255, 0.8);
+        }
+        .state-real .cute-eye {
+            animation: happyBounce 0.6s ease-in-out infinite;
+        }
+
+        @keyframes happyBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* Happy mouth for real state */
+        .happy-mouth {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 8px;
+            border: 3px solid #2c2c2c;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Worried mouth for AI state */
+        .worried-mouth {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+            background: #2c2c2c;
+            border-radius: 50%;
+        }
+
+        /* ============================================
+           PHONE MOCKUPS
+           ============================================ */
+
+        .phone-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .phone-mockup {
+            width: 260px;
+            height: 520px;
+            background: #1a1a1a;
+            border-radius: 36px;
+            padding: 10px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #f8f4f0 0%, #f0ebe5 100%);
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-notch {
+            width: 100px;
+            height: 24px;
+            background: #1a1a1a;
+            border-radius: 0 0 16px 16px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .fake-app-content {
+            padding: 45px 15px 15px;
+        }
+
+        .fake-header {
+            height: 36px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .fake-card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .fake-avatar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .fake-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #ffd4c4 0%, #ffb8a8 100%);
+            border-radius: 50%;
+        }
+
+        .fake-name-time {
+            flex: 1;
+        }
+
+        .fake-name {
+            height: 10px;
+            width: 70px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .fake-time {
+            height: 8px;
+            width: 40px;
+            background: #eee;
+            border-radius: 4px;
+        }
+
+        .fake-image {
+            height: 100px;
+            background: linear-gradient(135deg, #e8e0f0 0%, #d8d0e8 100%);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .fake-text-line {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .fake-text-line.short { width: 65%; }
+
+        /* Floating companion on phone */
+        .floating-companion {
+            position: absolute;
+            bottom: 90px;
+            right: 18px;
+        }
+
+        .floating-companion .face-circle {
+            width: 48px;
+            height: 48px;
+            gap: 8px;
+        }
+
+        .floating-companion .cute-eye {
+            width: 9px;
+            height: 9px;
+        }
+
+        .floating-companion .cute-eye::after {
+            width: 3px;
+            height: 3px;
+            top: 1px;
+            left: 1px;
+        }
+
+        .phone-label {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* ============================================
+           EXPRESSIONS SHOWCASE
+           ============================================ */
+
+        .expressions-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .expression-item {
+            text-align: center;
+        }
+
+        .expression-label {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Sleepy eyes */
+        .sleepy .cute-eye {
+            height: 6px;
+            border-radius: 50% 50% 50% 50% / 100% 100% 0% 0%;
+        }
+
+        /* Excited eyes */
+        .excited .cute-eye {
+            width: 16px;
+            height: 16px;
+            animation: excitedBounce 0.4s ease-in-out infinite;
+        }
+
+        @keyframes excitedBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Thinking - looking up */
+        .thinking .cute-eye {
+            transform: translateY(-3px);
+        }
+
+        /* Love eyes */
+        .love .cute-eye {
+            background: #ff6b8a;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #e8e0d8;
+            color: #999;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Little Circle</h1>
+    <p class="subtitle">Friendly Companion Concepts</p>
+
+    <!-- CONCEPT 1: Two Eyes Face -->
+    <div class="section">
+        <h2 class="section-title">Concept 1: The Cute Face</h2>
+        <p class="section-subtitle">Two eyes, expressive, like a little friend looking at you</p>
+
+        <div class="concepts-row">
+            <div class="concept-card">
+                <div class="face-circle face-peach breathe blink">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="concept-label">Warm Peach</div>
+                <div class="concept-sublabel">Soft, friendly, inviting</div>
+            </div>
+
+            <div class="concept-card">
+                <div class="face-circle face-lavender breathe blink">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="concept-label">Soft Lavender</div>
+                <div class="concept-sublabel">Calm, trustworthy, gentle</div>
+            </div>
+
+            <div class="concept-card">
+                <div class="face-circle face-mint breathe blink">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="concept-label">Fresh Mint</div>
+                <div class="concept-sublabel">Clean, reassuring, fresh</div>
+            </div>
+
+            <div class="concept-card">
+                <div class="face-circle face-cream breathe blink">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="concept-label">Warm Cream</div>
+                <div class="concept-sublabel">Cozy, warm, approachable</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONCEPT 2: The Blob -->
+    <div class="section">
+        <h2 class="section-title">Concept 2: The Little Blob</h2>
+        <p class="section-subtitle">Organic, squishy, feels alive — like a little creature</p>
+
+        <div class="concepts-row">
+            <div class="concept-card">
+                <div class="blob blob-peach squish">
+                    <div class="blob-eye"></div>
+                    <div class="blob-eye"></div>
+                </div>
+                <div class="concept-label">Peachy Blob</div>
+                <div class="concept-sublabel">Squishy, playful, alive</div>
+            </div>
+
+            <div class="concept-card">
+                <div class="blob blob-lavender bounce">
+                    <div class="blob-eye"></div>
+                    <div class="blob-eye"></div>
+                </div>
+                <div class="concept-label">Lavender Blob</div>
+                <div class="concept-sublabel">Bouncy, curious, happy</div>
+            </div>
+
+            <div class="concept-card">
+                <div class="blob blob-mint squish">
+                    <div class="blob-eye"></div>
+                    <div class="blob-eye"></div>
+                </div>
+                <div class="concept-label">Minty Blob</div>
+                <div class="concept-sublabel">Fresh, friendly, alert</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATES -->
+    <div class="section">
+        <h2 class="section-title">Emotional States</h2>
+        <p class="section-subtitle">How your companion reacts to what it finds</p>
+
+        <div class="states-row">
+            <div class="state-card state-idle">
+                <div class="face-circle face-peach">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="state-name">Chillin'</div>
+                <div class="state-desc">Happy, calm, just vibing with you</div>
+            </div>
+
+            <div class="state-card state-scanning">
+                <div class="face-circle">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="state-name">Curious</div>
+                <div class="state-desc">Looking around, checking things out</div>
+            </div>
+
+            <div class="state-card state-ai">
+                <div class="face-circle" style="position: relative;">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                    <div class="worried-mouth"></div>
+                </div>
+                <div class="state-name">Uh Oh!</div>
+                <div class="state-desc">Found AI — eyes wide, a bit worried</div>
+            </div>
+
+            <div class="state-card state-real">
+                <div class="face-circle" style="position: relative;">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                    <div class="happy-mouth"></div>
+                </div>
+                <div class="state-name">All Good!</div>
+                <div class="state-desc">It's real — happy smile, relieved</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MORE EXPRESSIONS -->
+    <div class="section">
+        <h2 class="section-title">Personality Moments</h2>
+        <p class="section-subtitle">Little expressions that make it feel alive</p>
+
+        <div class="expressions-row">
+            <div class="expression-item">
+                <div class="face-circle face-peach sleepy">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="expression-label">Sleepy</div>
+            </div>
+
+            <div class="expression-item">
+                <div class="face-circle face-cream excited">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="expression-label">Excited</div>
+            </div>
+
+            <div class="expression-item">
+                <div class="face-circle face-lavender thinking">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="expression-label">Thinking</div>
+            </div>
+
+            <div class="expression-item">
+                <div class="face-circle face-mint love">
+                    <div class="cute-eye"></div>
+                    <div class="cute-eye"></div>
+                </div>
+                <div class="expression-label">Love</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHONE MOCKUPS -->
+    <div class="section">
+        <h2 class="section-title">In Your Pocket</h2>
+        <p class="section-subtitle">How it lives on your screen</p>
+
+        <div class="phone-section">
+            <div>
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="phone-notch"></div>
+                        <div class="fake-app-content">
+                            <div class="fake-header"></div>
+                            <div class="fake-card">
+                                <div class="fake-avatar-row">
+                                    <div class="fake-avatar"></div>
+                                    <div class="fake-name-time">
+                                        <div class="fake-name"></div>
+                                        <div class="fake-time"></div>
+                                    </div>
+                                </div>
+                                <div class="fake-image"></div>
+                                <div class="fake-text-line"></div>
+                                <div class="fake-text-line short"></div>
+                            </div>
+                            <div class="fake-card">
+                                <div class="fake-avatar-row">
+                                    <div class="fake-avatar"></div>
+                                    <div class="fake-name-time">
+                                        <div class="fake-name"></div>
+                                        <div class="fake-time"></div>
+                                    </div>
+                                </div>
+                                <div class="fake-text-line"></div>
+                                <div class="fake-text-line"></div>
+                            </div>
+                        </div>
+                        <div class="floating-companion state-idle">
+                            <div class="face-circle face-peach">
+                                <div class="cute-eye"></div>
+                                <div class="cute-eye"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-label">Just hanging out</div>
+            </div>
+
+            <div>
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="phone-notch"></div>
+                        <div class="fake-app-content">
+                            <div class="fake-header"></div>
+                            <div class="fake-card">
+                                <div class="fake-avatar-row">
+                                    <div class="fake-avatar"></div>
+                                    <div class="fake-name-time">
+                                        <div class="fake-name"></div>
+                                        <div class="fake-time"></div>
+                                    </div>
+                                </div>
+                                <div class="fake-image" style="background: linear-gradient(135deg, #ffccd5 0%, #ffb3c1 100%);"></div>
+                                <div class="fake-text-line"></div>
+                            </div>
+                            <div class="fake-card">
+                                <div class="fake-avatar-row">
+                                    <div class="fake-avatar"></div>
+                                    <div class="fake-name-time">
+                                        <div class="fake-name"></div>
+                                        <div class="fake-time"></div>
+                                    </div>
+                                </div>
+                                <div class="fake-text-line"></div>
+                                <div class="fake-text-line short"></div>
+                            </div>
+                        </div>
+                        <div class="floating-companion state-ai">
+                            <div class="face-circle" style="position: relative;">
+                                <div class="cute-eye"></div>
+                                <div class="cute-eye"></div>
+                                <div class="worried-mouth" style="bottom: 10px; width: 8px; height: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-label">Found something fishy!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        The Little Circle — thelittlecircle.com<br>
+        Friendly Companion Concepts — October 2026
+    </div>
+</body>
+</html>

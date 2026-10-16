@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Little Circle — Eye Concepts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            max-width: 1000px;
+            margin: 0 auto 60px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            color: #ccc;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            justify-items: center;
+        }
+
+        .concept {
+            text-align: center;
+        }
+
+        .concept-label {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #aaa;
+        }
+
+        .concept-sublabel {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Base circle styles */
+        .circle-container {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .pupil {
+            border-radius: 50%;
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+
+        /* === STYLE 1: Soft & Friendly === */
+        .style-soft .circle {
+            background: linear-gradient(145deg, #f5f5f7 0%, #e8e8ed 100%);
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.3),
+                0 0 40px rgba(255,255,255,0.1),
+                inset 0 2px 4px rgba(255,255,255,0.8);
+        }
+
+        .style-soft .pupil {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(145deg, #2c2c2e 0%, #1c1c1e 100%);
+            box-shadow:
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .style-soft .pupil::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            top: 6px;
+            left: 6px;
+        }
+
+        /* === STYLE 2: Glowing === */
+        .style-glow .circle {
+            background: linear-gradient(145deg, #ffffff 0%, #f0f0f5 100%);
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.2),
+                0 0 30px rgba(100, 150, 255, 0.3);
+        }
+
+        .style-glow .pupil {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(145deg, #4a6cf7 0%, #2d4dd4 100%);
+            box-shadow:
+                0 0 20px rgba(74, 108, 247, 0.6),
+                inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .style-glow .pupil::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+
+        /* === STYLE 3: Minimal === */
+        .style-minimal .circle {
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+        }
+
+        .style-minimal .pupil {
+            width: 24px;
+            height: 24px;
+            background: #1a1a1a;
+        }
+
+        .style-minimal .pupil::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+        }
+
+        /* === STATES SECTION === */
+        .states-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+
+        @media (max-width: 700px) {
+            .states-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .state-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .state-name {
+            font-weight: 600;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .state-desc {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* Idle state - gentle drift animation */
+        .state-idle .pupil {
+            animation: gentleDrift 4s ease-in-out infinite;
+        }
+
+        @keyframes gentleDrift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(3px, 2px); }
+            50% { transform: translate(-2px, 3px); }
+            75% { transform: translate(2px, -2px); }
+        }
+
+        /* Scanning state */
+        .state-scanning .circle {
+            background: linear-gradient(145deg, #e8f0ff 0%, #d0e0ff 100%);
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.2),
+                0 0 30px rgba(74, 108, 247, 0.4);
+        }
+
+        .state-scanning .pupil {
+            background: linear-gradient(145deg, #4a6cf7 0%, #2d4dd4 100%);
+            animation: lookAround 1.5s ease-in-out infinite;
+        }
+
+        @keyframes lookAround {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(10px, -5px); }
+            40% { transform: translate(-8px, 8px); }
+            60% { transform: translate(8px, 6px); }
+            80% { transform: translate(-6px, -8px); }
+        }
+
+        /* AI Detected state */
+        .state-ai .circle {
+            background: linear-gradient(145deg, #fff5eb 0%, #ffe8d5 100%);
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.2),
+                0 0 40px rgba(255, 149, 0, 0.5);
+            animation: alertPulse 1s ease-in-out infinite;
+        }
+
+        .state-ai .pupil {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(145deg, #ff9500 0%, #ff6b00 100%);
+            box-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.2), 0 0 40px rgba(255, 149, 0, 0.5); }
+            50% { box-shadow: 0 4px 20px rgba(0,0,0,0.2), 0 0 60px rgba(255, 149, 0, 0.7); }
+        }
+
+        /* Real/Safe state */
+        .state-real .circle {
+            background: linear-gradient(145deg, #e8fff0 0%, #d0ffd8 100%);
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.2),
+                0 0 30px rgba(52, 199, 89, 0.4);
+        }
+
+        .state-real .pupil {
+            background: linear-gradient(145deg, #34c759 0%, #28a745 100%);
+            animation: happyBlink 2s ease-in-out infinite;
+        }
+
+        @keyframes happyBlink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        /* === PHONE MOCKUP === */
+        .phone-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .phone-mockup {
+            width: 280px;
+            height: 560px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 0 0 2px rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-screen.dark-content {
+            background: linear-gradient(180deg, #1a1a2e 0%, #2d2d44 100%);
+        }
+
+        .phone-notch {
+            width: 120px;
+            height: 28px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .fake-content {
+            padding: 50px 20px 20px;
+        }
+
+        .fake-post {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .fake-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .fake-name {
+            display: inline-block;
+            width: 80px;
+            height: 12px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 6px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .fake-image {
+            width: 100%;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .fake-text {
+            height: 10px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 5px;
+            margin-top: 12px;
+        }
+
+        .fake-text.short {
+            width: 60%;
+        }
+
+        /* Floating circle on phone */
+        .floating-circle {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .floating-circle .circle {
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-circle .pupil {
+            width: 18px;
+            height: 18px;
+        }
+
+        .floating-circle .pupil::after {
+            width: 5px;
+            height: 5px;
+            top: 3px;
+            left: 3px;
+        }
+
+        .phone-label {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        /* === COLOR PALETTE === */
+        .palette-section {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .color-swatch {
+            text-align: center;
+        }
+
+        .swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin: 0 auto 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .swatch.idle { background: linear-gradient(145deg, #f5f5f7, #e8e8ed); }
+        .swatch.scanning { background: linear-gradient(145deg, #4a6cf7, #2d4dd4); }
+        .swatch.ai { background: linear-gradient(145deg, #ff9500, #ff6b00); }
+        .swatch.real { background: linear-gradient(145deg, #34c759, #28a745); }
+
+        .swatch-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Little Circle</h1>
+    <p class="subtitle">Eye Concept — Visual Explorations</p>
+
+    <!-- Style Variations -->
+    <div class="section">
+        <h2 class="section-title">Style Variations</h2>
+        <div class="concepts-grid">
+            <div class="concept">
+                <div class="circle-container style-soft">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="concept-label">Soft & Friendly</div>
+                <div class="concept-sublabel">Warm, approachable, premium feel</div>
+            </div>
+
+            <div class="concept">
+                <div class="circle-container style-glow">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="concept-label">Glowing</div>
+                <div class="concept-sublabel">Tech-forward, alive, energetic</div>
+            </div>
+
+            <div class="concept">
+                <div class="circle-container style-minimal">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="concept-label">Minimal</div>
+                <div class="concept-sublabel">Clean, simple, universal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- States -->
+    <div class="section">
+        <h2 class="section-title">States & Animations</h2>
+        <div class="states-grid">
+            <div class="state-card">
+                <div class="circle-container style-soft state-idle">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="state-name">Idle</div>
+                <div class="state-desc">Gentle drift, calm presence, barely noticeable</div>
+            </div>
+
+            <div class="state-card">
+                <div class="circle-container style-soft state-scanning">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="state-name">Scanning</div>
+                <div class="state-desc">Looking around, analyzing content</div>
+            </div>
+
+            <div class="state-card">
+                <div class="circle-container style-soft state-ai">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="state-name">AI Detected</div>
+                <div class="state-desc">Alert! Pupil widens, amber glow</div>
+            </div>
+
+            <div class="state-card">
+                <div class="circle-container style-soft state-real">
+                    <div class="circle">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="state-name">Real / Human</div>
+                <div class="state-desc">All good! Happy blink, green</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="section">
+        <h2 class="section-title">Color Palette</h2>
+        <div class="palette-section">
+            <div class="color-swatch">
+                <div class="swatch idle"></div>
+                <div class="swatch-label">Idle<br>#F5F5F7</div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch scanning"></div>
+                <div class="swatch-label">Scanning<br>#4A6CF7</div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch ai"></div>
+                <div class="swatch-label">AI Detected<br>#FF9500</div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch real"></div>
+                <div class="swatch-label">Real/Human<br>#34C759</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phone Mockups -->
+    <div class="section">
+        <h2 class="section-title">In Context — Phone Mockups</h2>
+        <div class="phone-section">
+            <div>
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="phone-notch"></div>
+                        <div class="fake-content">
+                            <div class="fake-post">
+                                <span class="fake-avatar"></span>
+                                <span class="fake-name"></span>
+                                <div class="fake-image"></div>
+                                <div class="fake-text"></div>
+                                <div class="fake-text short"></div>
+                            </div>
+                            <div class="fake-post">
+                                <span class="fake-avatar"></span>
+                                <span class="fake-name"></span>
+                                <div class="fake-text"></div>
+                                <div class="fake-text"></div>
+                            </div>
+                        </div>
+                        <div class="floating-circle style-soft state-idle">
+                            <div class="circle">
+                                <div class="pupil"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-label">Always-On Mode (Idle)</div>
+            </div>
+
+            <div>
+                <div class="phone-mockup">
+                    <div class="phone-screen dark-content">
+                        <div class="phone-notch"></div>
+                        <div class="fake-content">
+                            <div class="fake-post">
+                                <span class="fake-avatar"></span>
+                                <span class="fake-name"></span>
+                                <div class="fake-image"></div>
+                                <div class="fake-text"></div>
+                            </div>
+                            <div class="fake-post">
+                                <span class="fake-avatar"></span>
+                                <span class="fake-name"></span>
+                                <div class="fake-image"></div>
+                            </div>
+                        </div>
+                        <div class="floating-circle style-soft state-ai">
+                            <div class="circle">
+                                <div class="pupil"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-label">AI Detected Alert</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        The Little Circle — thelittlecircle.com<br>
+        Eye Concept Explorations — October 2026
+    </div>
+</body>
+</html>

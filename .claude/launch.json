@@ -3,7 +3,9 @@
   "configurations": [
     {
       "name": "web",
-      "url": "http://localhost:3000"
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\Users\\USER\\OneDrive\\Documents\\AI or Not\\start-web.bat"],
+      "port": 3000
     }
   ]
 }

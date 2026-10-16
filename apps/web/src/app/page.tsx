@@ -1,17 +1,19 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
-import WhatItDetects from "@/components/WhatItDetects";
-import Pricing from "@/components/Pricing";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/marketing/Navbar";
+import Hero from "@/components/marketing/Hero";
+import HowItWorks from "@/components/marketing/HowItWorks";
+import WhatItDetects from "@/components/marketing/WhatItDetects";
+import Privacy from "@/components/marketing/Privacy";
+import Pricing from "@/components/marketing/Pricing";
+import Footer from "@/components/marketing/Footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen">
       <Navbar />
       <Hero />
       <HowItWorks />
       <WhatItDetects />
+      <Privacy />
       <Pricing />
       <Footer />
     </main>

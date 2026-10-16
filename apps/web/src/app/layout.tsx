@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Little Circle — Your companion that tells you what's real",
+  title: "The Little Circle - Your companion that tells you what's real",
   description:
     "A little floating circle on all your devices. Tap it to know if what you're seeing is AI or not. Detects AI-generated images, video, text, audio, and live calls instantly.",
   keywords: ["AI detection", "deepfake detector", "AI content", "fake video", "AI generated", "The Little Circle"],
