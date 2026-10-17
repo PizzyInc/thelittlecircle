@@ -3,7 +3,7 @@
   "name": "The Little Circle",
   "version": "0.1.0",
   "description": "Your AI-detection companion — floating on every page.",
-  "permissions": ["storage"],
+  "permissions": ["storage", "scripting", "tabs"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "src/popup/index.html",
@@ -21,9 +21,21 @@
       "all_frames": false,
       "exclude_matches": [
         "https://thelittlecircle.com/*",
+        "https://www.thelittlecircle.com/*",
         "http://localhost:3000/*",
         "http://localhost:3001/*"
       ]
+    },
+    {
+      "matches": [
+        "https://thelittlecircle.com/*",
+        "https://www.thelittlecircle.com/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ],
+      "js": ["src/bridge.ts"],
+      "run_at": "document_end",
+      "all_frames": false
     }
   ],
   "icons": {

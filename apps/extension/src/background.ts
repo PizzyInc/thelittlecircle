@@ -1,4 +1,31 @@
-// Service worker — handles install and storage defaults
+// Service worker — inject into existing tabs and set storage defaults
+
+const EXCLUDED = [
+  "thelittlecircle.com",
+  "www.thelittlecircle.com",
+  "localhost",
+];
+
+function isEligible(url: string | undefined): boolean {
+  if (!url) return false;
+  if (url.startsWith("chrome://") || url.startsWith("chrome-extension://") || url.startsWith("edge://")) return false;
+  try {
+    const host = new URL(url).hostname;
+    return !EXCLUDED.includes(host);
+  } catch {
+    return false;
+  }
+}
+
+async function injectIntoAllTabs() {
+  const tabs = await chrome.tabs.query({});
+  for (const tab of tabs) {
+    if (!tab.id || !isEligible(tab.url)) continue;
+    chrome.scripting
+      .executeScript({ target: { tabId: tab.id }, files: ["src/content.js"] })
+      .catch(() => {}); // ignore restricted pages
+  }
+}
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(["tlc_active", "tlc_name", "tlc_plan"], (result) => {
@@ -8,4 +35,9 @@ chrome.runtime.onInstalled.addListener(() => {
     if (!result.tlc_plan) updates.tlc_plan = "free";
     if (Object.keys(updates).length > 0) chrome.storage.local.set(updates);
   });
+  injectIntoAllTabs();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  injectIntoAllTabs();
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function getDeviceId(): string {
@@ -66,6 +67,7 @@ function getDeviceInfo(): { name: string; type: DeviceType } {
 }
 
 export default function DeviceRegistrar({ userId }: { userId: string }) {
+  const pathname = usePathname();
   useEffect(() => {
     const id = getDeviceId();
     const { name, type } = getDeviceInfo();
@@ -74,34 +76,35 @@ export default function DeviceRegistrar({ userId }: { userId: string }) {
     supabase
       .from("user_devices")
       .upsert({ id, user_id: userId, name, type, last_active: new Date().toISOString() }, { onConflict: "id" })
-      .select("circle_active")
+      .select("circle_active, created_at")
       .single()
       .then(({ data }) => {
-        if (data) {
-          localStorage.setItem("tlc_circle_active", String(data.circle_active));
-          window.dispatchEvent(new CustomEvent("tlcCircleActiveChange", { detail: data.circle_active }));
+        if (!data) return;
+
+        localStorage.setItem("tlc_circle_active", String(data.circle_active));
+        window.dispatchEvent(new CustomEvent("tlcCircleActiveChange", { detail: data.circle_active }));
+
+        // Device limit check — free plan allows 1 device.
+        // A device is over-limit only if older devices exist (i.e. this device is not the first one).
+        const plan = localStorage.getItem("tlc_plan") ?? "free";
+        if (plan !== "pro" && plan !== "family") {
+          supabase
+            .from("user_devices")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .neq("id", id)
+            .lt("created_at", data.created_at)  // only count devices registered before this one
+            .then(({ count }) => {
+              const overLimit = (count ?? 0) >= 1;
+              localStorage.setItem("tlc_over_limit", String(overLimit));
+              window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: overLimit }));
+            });
+        } else {
+          localStorage.setItem("tlc_over_limit", "false");
+          window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: false }));
         }
       });
-
-    // Device limit check — free plan allows 1 device.
-    // Only flag over-limit if OTHER devices exist (not the current one) and user is not pro/family.
-    const plan = localStorage.getItem("tlc_plan") ?? "free";
-    if (plan !== "pro" && plan !== "family") {
-      supabase
-        .from("user_devices")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .neq("id", id)
-        .then(({ count }) => {
-          const overLimit = (count ?? 0) >= 1;
-          localStorage.setItem("tlc_over_limit", String(overLimit));
-          window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: overLimit }));
-        });
-    } else {
-      localStorage.setItem("tlc_over_limit", "false");
-      window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: false }));
-    }
-  }, [userId]);
+  }, [userId, pathname]);
 
   return null;
 }

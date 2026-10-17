@@ -30,13 +30,17 @@ export default function DeviceLimitModal() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setShow(localStorage.getItem("tlc_over_limit") === "true");
+    const overLimit = localStorage.getItem("tlc_over_limit") === "true";
+    setShow(overLimit && pathname !== "/settings");
 
     function onLimitChange(e: Event) {
-      setShow((e as CustomEvent<boolean>).detail);
+      const over = (e as CustomEvent<boolean>).detail;
+      setShow(over && pathname !== "/settings");
     }
     function onStorage(e: StorageEvent) {
-      if (e.key === "tlc_over_limit") setShow(e.newValue === "true");
+      if (e.key === "tlc_over_limit") {
+        setShow(e.newValue === "true" && pathname !== "/settings");
+      }
     }
     window.addEventListener("tlcDeviceLimitChange", onLimitChange);
     window.addEventListener("storage", onStorage);
@@ -44,7 +48,7 @@ export default function DeviceLimitModal() {
       window.removeEventListener("tlcDeviceLimitChange", onLimitChange);
       window.removeEventListener("storage", onStorage);
     };
-  }, []);
+  }, [pathname]);
 
   if (!show) return null;
 
@@ -162,7 +166,6 @@ export default function DeviceLimitModal() {
         <div style={{ textAlign: "center" }}>
           <button
             onClick={() => {
-              setShow(false);
               if (pathname !== "/settings") router.push("/settings");
             }}
             style={{ fontSize: 12, color: "#64B5D9", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0 }}

@@ -71,6 +71,18 @@ async function detectImage(base64: string) {
   } as const;
 }
 
+// ─── CORS — needed so the Chrome extension content script can call this ──────
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
@@ -114,9 +126,9 @@ export async function POST(request: NextRequest) {
       if (error) console.warn("Detection save failed (run SQL migrations?):", error.message);
     });
 
-    return NextResponse.json({ verdict: result.verdict, confidence: result.confidence });
+    return NextResponse.json({ verdict: result.verdict, confidence: result.confidence }, { headers: CORS });
   } catch (err) {
     console.error("Detection error:", err);
-    return NextResponse.json({ error: "Detection failed. Try again." }, { status: 500 });
+    return NextResponse.json({ error: "Detection failed. Try again." }, { status: 500, headers: CORS });
   }
 }
