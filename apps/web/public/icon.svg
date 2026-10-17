@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe8dc"/>
+      <stop offset="100%" stop-color="#ffd4c4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle (full bleed for maskable) -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- Left eye — white outer -->
+  <circle cx="186" cy="248" r="54" fill="white"/>
+  <!-- Left pupil -->
+  <circle cx="186" cy="248" r="34" fill="#2c2c2c"/>
+  <!-- Left highlight -->
+  <circle cx="175" cy="237" r="13" fill="rgba(255,255,255,0.85)"/>
+
+  <!-- Right eye — white outer -->
+  <circle cx="326" cy="248" r="54" fill="white"/>
+  <!-- Right pupil -->
+  <circle cx="326" cy="248" r="34" fill="#2c2c2c"/>
+  <!-- Right highlight -->
+  <circle cx="315" cy="237" r="13" fill="rgba(255,255,255,0.85)"/>
+</svg>
