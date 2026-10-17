@@ -10,7 +10,9 @@ export default function ExtensionBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Only relevant in Chrome/Chromium-based browsers
+    // Only relevant in Chrome/Chromium on desktop — not mobile (can't install extensions there)
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) return;
     const isChrome =
       /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     if (!isChrome) return;

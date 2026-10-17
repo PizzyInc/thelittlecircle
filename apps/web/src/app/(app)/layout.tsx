@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen bg-sky-50 flex flex-col">
+    <div className="min-h-screen bg-sky-50 flex flex-col overflow-x-hidden">
       <NavProgress />
       <DeviceRegistrar userId={user.id} />
       <FloatingCircle />
