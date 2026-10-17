@@ -38,7 +38,11 @@ const STATE_STYLES = {
 } as const;
 
 type State = keyof typeof STATE_STYLES;
-interface VerdictBubble { verdict: "ai" | "real"; confidence: number }
+interface VerdictBubble {
+  verdict: "ai" | "real" | "info";
+  confidence?: number;
+  message?: string;
+}
 
 function getStorage<T>(key: string, fallback: T): Promise<T> {
   return new Promise((res) => {
@@ -50,19 +54,53 @@ function setStorage(key: string, value: unknown) {
   chrome.storage.local.set({ [key]: value });
 }
 
-function findScanTarget(cx: number, cy: number): { el: Element | null; text: string } {
-  const SEL = "p, h1, h2, h3, li, blockquote, article, td, [data-content]";
-  const offsets = [[0, -90], [0, 90], [-90, 0], [90, 0], [0, -160], [0, 160]];
-  for (const [dx, dy] of offsets) {
-    const hit = document.elementFromPoint(cx + dx, cy + dy);
-    if (!hit) continue;
-    const el = (hit.closest(SEL) ?? hit) as HTMLElement;
-    const text = (el as HTMLElement).innerText?.replace(/\s+/g, " ").trim() ?? "";
-    if (text.length >= 50) return { el, text };
+async function extractContent(cx: number, cy: number): Promise<{
+  type: "text" | "image";
+  content: string;
+  el: HTMLElement | null;
+}> {
+  // 1. Image at cursor position? Extension fetch can bypass CORS.
+  const hitEl = document.elementFromPoint(cx, cy);
+  if (hitEl) {
+    const imgEl =
+      hitEl.tagName === "IMG"
+        ? (hitEl as HTMLImageElement)
+        : (hitEl.closest("img") as HTMLImageElement | null);
+    if (imgEl?.src && /^https?:/.test(imgEl.src)) {
+      try {
+        const res = await fetch(imgEl.src);
+        const blob = await res.blob();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        return { type: "image", content: base64, el: imgEl };
+      } catch { /* fall through to text */ }
+    }
   }
-  const center = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-  const main = (center?.closest("main") ?? document.querySelector("main") ?? document.body) as HTMLElement;
-  return { el: main, text: main.innerText.replace(/\s+/g, " ").trim() };
+
+  // 2. Pull main content text — prefer article/main over full body
+  const container = (
+    document.querySelector("article") ??
+    document.querySelector('[role="main"]') ??
+    document.querySelector("main") ??
+    document.body
+  ) as HTMLElement;
+
+  const paras = Array.from(
+    container.querySelectorAll("p, h1, h2, h3, li, blockquote, td")
+  )
+    .map((e) => (e as HTMLElement).innerText?.replace(/\s+/g, " ").trim())
+    .filter((t): t is string => !!t && t.length > 40);
+
+  let text = paras.join(" ");
+  if (text.length < 100) {
+    text = container.innerText.replace(/\s+/g, " ").trim();
+  }
+
+  return { type: "text", content: text.slice(0, 3000), el: container };
 }
 
 export default function FloatingCircle() {
@@ -215,18 +253,27 @@ export default function FloatingCircle() {
     if (state === "analyzing" || !pos) return;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
-    const { el, text } = findScanTarget(cx, cy);
-    if (text.length < 50) return;
+
+    setState("analyzing");
+
+    const { type, content, el } = await extractContent(cx, cy);
+
+    if (type === "text" && content.length < 250) {
+      setState("idle");
+      setBubble({ verdict: "info", message: "Not enough text to scan" });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
+      return;
+    }
 
     if (el) {
-      (el as HTMLElement).style.outline = "2px solid rgba(100, 140, 255, 0.55)";
-      (el as HTMLElement).style.outlineOffset = "6px";
+      el.style.outline = "2px solid rgba(100, 140, 255, 0.55)";
+      el.style.outlineOffset = "6px";
       highlightedEl.current = el;
     }
 
-    setState("analyzing");
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -235,7 +282,7 @@ export default function FloatingCircle() {
       const res = await fetch(API_URL, {
         method: "POST",
         headers,
-        body: JSON.stringify({ type: "text", content: text.slice(0, 3000) }),
+        body: JSON.stringify({ type, content }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -340,18 +387,32 @@ export default function FloatingCircle() {
             gap: 7,
             padding: "8px 13px",
             borderRadius: 20,
-            background: bubble.verdict === "ai" ? "rgba(255,100,30,0.92)" : "rgba(40,180,100,0.92)",
+            background: bubble.verdict === "ai"
+              ? "rgba(255,100,30,0.92)"
+              : bubble.verdict === "real"
+              ? "rgba(40,180,100,0.92)"
+              : "rgba(80,80,100,0.88)",
             backdropFilter: "blur(8px)",
-            boxShadow: bubble.verdict === "ai" ? "0 4px 20px rgba(255,100,30,0.4)" : "0 4px 20px rgba(40,180,100,0.4)",
+            boxShadow: bubble.verdict === "ai"
+              ? "0 4px 20px rgba(255,100,30,0.4)"
+              : bubble.verdict === "real"
+              ? "0 4px 20px rgba(40,180,100,0.4)"
+              : "0 4px 16px rgba(0,0,0,0.2)",
             whiteSpace: "nowrap",
           }}>
-            <span style={{ fontSize: 14 }}>{bubble.verdict === "ai" ? "🤖" : "✅"}</span>
+            <span style={{ fontSize: 14 }}>
+              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : "🔍"}
+            </span>
             <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>
-              {bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
+              {bubble.verdict === "info"
+                ? bubble.message
+                : bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
             </span>
-            <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, background: "rgba(0,0,0,0.15)", borderRadius: 10, padding: "1px 6px" }}>
-              {bubble.confidence}%
-            </span>
+            {bubble.verdict !== "info" && bubble.confidence !== undefined && (
+              <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, background: "rgba(0,0,0,0.15)", borderRadius: 10, padding: "1px 6px" }}>
+                {bubble.confidence}%
+              </span>
+            )}
           </div>
         </div>
       )}

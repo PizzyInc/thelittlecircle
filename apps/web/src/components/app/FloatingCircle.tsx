@@ -40,25 +40,59 @@ const STATE_STYLES = {
 
 type State = keyof typeof STATE_STYLES;
 
-interface VerdictBubble { verdict: "ai" | "real"; confidence: number }
+interface VerdictBubble {
+  verdict: "ai" | "real" | "info";
+  confidence?: number;
+  message?: string;
+}
 
-// Find the most relevant text element near the circle, or fall back to screen center
-function findScanTarget(cx: number, cy: number, circleEl: HTMLElement | null): { el: HTMLElement | null; text: string } {
-  const TEXT_SELECTORS = "p, h1, h2, h3, li, blockquote, article, td, .text, [data-content]";
-  const probeOffsets = [[0, -90], [0, 90], [-90, 0], [90, 0], [0, -160], [0, 160]];
-
-  for (const [dx, dy] of probeOffsets) {
-    const hit = document.elementFromPoint(cx + dx, cy + dy);
-    if (!hit || hit === circleEl || circleEl?.contains(hit)) continue;
-    const textEl = (hit.closest(TEXT_SELECTORS) ?? hit) as HTMLElement;
-    const text = textEl.innerText?.replace(/\s+/g, " ").trim() ?? "";
-    if (text.length >= 50) return { el: textEl, text };
+async function extractContent(cx: number, cy: number): Promise<{
+  type: "text" | "image";
+  content: string;
+  el: HTMLElement | null;
+}> {
+  // 1. Image at cursor? Try canvas for same-origin; skip cross-origin.
+  const hitEl = document.elementFromPoint(cx, cy);
+  if (hitEl) {
+    const imgEl =
+      hitEl.tagName === "IMG"
+        ? (hitEl as HTMLImageElement)
+        : (hitEl.closest("img") as HTMLImageElement | null);
+    if (imgEl?.src && /^https?:/.test(imgEl.src)) {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = imgEl.naturalWidth || imgEl.width;
+        canvas.height = imgEl.naturalHeight || imgEl.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(imgEl, 0, 0);
+          const base64 = canvas.toDataURL("image/jpeg", 0.85);
+          return { type: "image", content: base64, el: imgEl };
+        }
+      } catch { /* cross-origin; fall through to text */ }
+    }
   }
 
-  // Fall back to center of screen
-  const centerEl = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-  const main = (centerEl?.closest("main") ?? document.querySelector("main") ?? document.body) as HTMLElement;
-  return { el: main, text: main.innerText.replace(/\s+/g, " ").trim() };
+  // 2. Pull main content text — prefer article/main over full body
+  const container = (
+    document.querySelector("article") ??
+    document.querySelector('[role="main"]') ??
+    document.querySelector("main") ??
+    document.body
+  ) as HTMLElement;
+
+  const paras = Array.from(
+    container.querySelectorAll("p, h1, h2, h3, li, blockquote, td")
+  )
+    .map((e) => (e as HTMLElement).innerText?.replace(/\s+/g, " ").trim())
+    .filter((t): t is string => !!t && t.length > 40);
+
+  let text = paras.join(" ");
+  if (text.length < 100) {
+    text = container.innerText.replace(/\s+/g, " ").trim();
+  }
+
+  return { type: "text", content: text.slice(0, 3000), el: container };
 }
 
 export default function FloatingCircle() {
@@ -285,8 +319,17 @@ export default function FloatingCircle() {
     if (state === "analyzing" || !pos) return;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
-    const { el, text } = findScanTarget(cx, cy, circleRef.current);
-    if (text.length < 50) return;
+
+    setState("analyzing");
+    const { type, content, el } = await extractContent(cx, cy);
+
+    if (type === "text" && content.length < 250) {
+      setState("idle");
+      setBubble({ verdict: "info", message: "Not enough text to scan" });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
+      return;
+    }
 
     if (el) {
       el.style.outline = "2px solid rgba(100, 140, 255, 0.55)";
@@ -295,15 +338,14 @@ export default function FloatingCircle() {
       highlightedEl.current = el;
     }
 
-    setState("analyzing");
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const res = await fetch("/api/detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "text", content: text.slice(0, 3000) }),
+        body: JSON.stringify({ type, content }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -353,14 +395,18 @@ export default function FloatingCircle() {
     if (!pos) return;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
-    const { el, text } = findScanTarget(cx, cy, circleRef.current);
 
-    if (text.length < 50) {
-      setBubble(null);
+    setState("analyzing");
+    const { type, content, el } = await extractContent(cx, cy);
+
+    if (type === "text" && content.length < 250) {
+      setState("idle");
+      setBubble({ verdict: "info", message: "Not enough text to scan" });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
       return;
     }
 
-    // Highlight the target element
     if (el) {
       el.style.outline = "2px solid rgba(100, 140, 255, 0.55)";
       el.style.outlineOffset = "6px";
@@ -368,16 +414,14 @@ export default function FloatingCircle() {
       highlightedEl.current = el;
     }
 
-    setState("analyzing");
-
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const res = await fetch("/api/detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "text", content: text.slice(0, 3000) }),
+        body: JSON.stringify({ type, content }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -494,30 +538,40 @@ export default function FloatingCircle() {
               gap: 7,
               padding: "8px 13px",
               borderRadius: 20,
-              background: bubble.verdict === "ai" ? "rgba(255,100,30,0.92)" : "rgba(40,180,100,0.92)",
+              background: bubble.verdict === "ai"
+                ? "rgba(255,100,30,0.92)"
+                : bubble.verdict === "real"
+                ? "rgba(40,180,100,0.92)"
+                : "rgba(80,80,100,0.88)",
               backdropFilter: "blur(8px)",
               boxShadow: bubble.verdict === "ai"
                 ? "0 4px 20px rgba(255,100,30,0.4)"
-                : "0 4px 20px rgba(40,180,100,0.4)",
+                : bubble.verdict === "real"
+                ? "0 4px 20px rgba(40,180,100,0.4)"
+                : "0 4px 16px rgba(0,0,0,0.2)",
               whiteSpace: "nowrap",
             }}
           >
             <span style={{ fontSize: 14 }}>
-              {bubble.verdict === "ai" ? "🤖" : "✅"}
+              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : "🔍"}
             </span>
             <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: 0.2 }}>
-              {bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
+              {bubble.verdict === "info"
+                ? bubble.message
+                : bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
             </span>
-            <span style={{
-              color: "rgba(255,255,255,0.75)",
-              fontSize: 11,
-              fontWeight: 500,
-              background: "rgba(0,0,0,0.15)",
-              borderRadius: 10,
-              padding: "1px 6px",
-            }}>
-              {bubble.confidence}%
-            </span>
+            {bubble.verdict !== "info" && bubble.confidence !== undefined && (
+              <span style={{
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 11,
+                fontWeight: 500,
+                background: "rgba(0,0,0,0.15)",
+                borderRadius: 10,
+                padding: "1px 6px",
+              }}>
+                {bubble.confidence}%
+              </span>
+            )}
           </div>
         </div>
       )}
