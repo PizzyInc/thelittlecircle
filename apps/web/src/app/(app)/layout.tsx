@@ -9,6 +9,7 @@ import CircleNameOnboarding from "@/components/app/CircleNameOnboarding";
 import NavProgress from "@/components/app/NavProgress";
 import CircleLogo from "@/components/CircleLogo";
 import ExtensionBanner from "@/components/app/ExtensionBanner";
+import MobileInstallBanner from "@/components/app/MobileInstallBanner";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -61,6 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       <ExtensionBanner />
+      <MobileInstallBanner />
 
       <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto w-full pb-24">
         {children}

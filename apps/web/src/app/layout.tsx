@@ -12,6 +12,12 @@ export const metadata: Metadata = {
   description:
     "A little floating circle on all your devices. Tap it to know if what you're seeing is AI or not. Detects AI-generated images, video, text, audio, and live calls instantly.",
   keywords: ["AI detection", "deepfake detector", "AI content", "fake video", "AI generated", "The Little Circle"],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Circle",
+  },
   openGraph: {
     title: "The Little Circle",
     description: "Your companion that tells you what's real.",
