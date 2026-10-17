@@ -83,16 +83,24 @@ export default function DeviceRegistrar({ userId }: { userId: string }) {
         }
       });
 
-    // Device limit check — free plan allows 1 device
-    supabase
-      .from("user_devices")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .then(({ count }) => {
-        const overLimit = (count ?? 0) > 1;
-        localStorage.setItem("tlc_over_limit", String(overLimit));
-        window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: overLimit }));
-      });
+    // Device limit check — free plan allows 1 device.
+    // Only flag over-limit if OTHER devices exist (not the current one) and user is not pro/family.
+    const plan = localStorage.getItem("tlc_plan") ?? "free";
+    if (plan !== "pro" && plan !== "family") {
+      supabase
+        .from("user_devices")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .neq("id", id)
+        .then(({ count }) => {
+          const overLimit = (count ?? 0) >= 1;
+          localStorage.setItem("tlc_over_limit", String(overLimit));
+          window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: overLimit }));
+        });
+    } else {
+      localStorage.setItem("tlc_over_limit", "false");
+      window.dispatchEvent(new CustomEvent("tlcDeviceLimitChange", { detail: false }));
+    }
   }, [userId]);
 
   return null;

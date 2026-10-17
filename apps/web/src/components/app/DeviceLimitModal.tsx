@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 
 const PLANS = [
   {
@@ -25,6 +26,8 @@ const PLANS = [
 
 export default function DeviceLimitModal() {
   const [show, setShow] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setShow(localStorage.getItem("tlc_over_limit") === "true");
@@ -157,12 +160,15 @@ export default function DeviceLimitModal() {
 
         {/* Manage devices */}
         <div style={{ textAlign: "center" }}>
-          <Link
-            href="/settings"
-            style={{ fontSize: 12, color: "#64B5D9", textDecoration: "none" }}
+          <button
+            onClick={() => {
+              setShow(false);
+              if (pathname !== "/settings") router.push("/settings");
+            }}
+            style={{ fontSize: 12, color: "#64B5D9", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           >
             Or remove a device in Settings →
-          </Link>
+          </button>
         </div>
       </div>
     </div>
