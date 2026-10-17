@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import AccountSection from "./AccountSection";
 import DevicesSection from "./DevicesSection";
 import CircleSection from "./CircleSection";
+import SubscriptionSection from "./SubscriptionSection";
+import NotificationsSection from "./NotificationsSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -29,18 +31,9 @@ export default async function SettingsPage() {
 
         <CircleSection />
 
-        {[
-          { title: "Subscription", description: "Plan, billing, usage" },
-          { title: "Notifications", description: "Alert preferences" },
-        ].map((section) => (
-          <div key={section.title} className="bg-white rounded-2xl border border-sky-200 p-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-sky-900">{section.title}</h2>
-              <p className="text-sky-400 text-xs mt-0.5">{section.description}</p>
-            </div>
-            <span className="text-sky-300 text-xs">Coming soon</span>
-          </div>
-        ))}
+        <SubscriptionSection />
+
+        <NotificationsSection />
       </div>
     </div>
   );
