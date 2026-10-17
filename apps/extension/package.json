@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite build --watch --mode development",
-    "build": "vite build"
+    "build": "vite build",
+    "package": "vite build && node zip-dist.js"
   },
   "dependencies": {
     "react": "^18.3.1",

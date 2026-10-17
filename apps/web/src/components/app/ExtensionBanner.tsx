@@ -86,43 +86,25 @@ export default function ExtensionBanner() {
         extension to see it floating as you browse.
       </p>
 
-      {EXT_URL ? (
-        <a
-          href={EXT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-block",
-            padding: "6px 14px",
-            background: "#0ea5e9",
-            color: "#fff",
-            borderRadius: 20,
-            fontSize: 12,
-            fontWeight: 600,
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          Install extension →
-        </a>
-      ) : (
-        <span
-          style={{
-            display: "inline-block",
-            padding: "6px 14px",
-            background: "#e0f2fe",
-            color: "#64b5d9",
-            borderRadius: 20,
-            fontSize: 12,
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          Coming to Chrome Web Store
-        </span>
-      )}
+      <a
+        href={EXT_URL || "/download"}
+        target={EXT_URL ? "_blank" : undefined}
+        rel={EXT_URL ? "noopener noreferrer" : undefined}
+        style={{
+          display: "inline-block",
+          padding: "6px 14px",
+          background: "#0ea5e9",
+          color: "#fff",
+          borderRadius: 20,
+          fontSize: 12,
+          fontWeight: 600,
+          textDecoration: "none",
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}
+      >
+        Install extension →
+      </a>
 
       <button
         onClick={dismiss}
