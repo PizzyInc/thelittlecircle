@@ -38,7 +38,7 @@ export default function LoginPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
+      options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || location.origin}/auth/callback` },
     });
   }
 
