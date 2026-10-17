@@ -30,21 +30,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <DeviceLimitModal />
       <CircleNameOnboarding />
 
-      <header className="h-14 bg-white border-b border-sky-200 flex items-center px-6 gap-4 flex-shrink-0">
-        <Link href="/" className="flex items-center gap-2 mr-6">
+      <header className="h-14 bg-white border-b border-sky-200 flex items-center px-4 sm:px-6 gap-2 sm:gap-4 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2 mr-2 sm:mr-6 shrink-0">
           <CircleLogo size={24} />
-          <span className="font-semibold text-sky-900 text-sm">The Little Circle</span>
+          <span className="font-semibold text-sky-900 text-sm hidden sm:block">The Little Circle</span>
         </Link>
 
-        <nav className="flex items-center gap-1 flex-1">
+        <nav className="flex items-center gap-0.5 sm:gap-1 flex-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-sky-600 hover:text-sky-900 hover:bg-sky-50 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-sm text-sky-600 hover:text-sky-900 hover:bg-sky-50 transition-colors"
             >
               <item.icon size={15} />
-              {item.label}
+              <span className="hidden sm:inline">{item.label}</span>
             </Link>
           ))}
         </nav>
@@ -52,17 +52,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <form action="/auth/signout" method="POST">
           <button
             type="submit"
-            className="flex items-center gap-1.5 text-xs text-sky-500 hover:text-sky-800 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-sky-500 hover:text-sky-800 transition-colors shrink-0"
           >
             <LogOut size={13} />
-            Sign out
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </form>
       </header>
 
       <ExtensionBanner />
 
-      <main className="flex-1 px-6 py-8 max-w-6xl mx-auto w-full pb-24">
+      <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto w-full pb-24">
         {children}
       </main>
     </div>
