@@ -28,9 +28,19 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      const forwardedHost = request.headers.get("x-forwarded-host");
+      const base =
+        process.env.NODE_ENV === "production" && forwardedHost
+          ? `https://${forwardedHost}`
+          : origin;
+      return NextResponse.redirect(`${base}${next}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const base =
+    process.env.NODE_ENV === "production" && forwardedHost
+      ? `https://${forwardedHost}`
+      : origin;
+  return NextResponse.redirect(`${base}/login?error=auth`);
 }
