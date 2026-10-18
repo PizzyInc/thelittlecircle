@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 
+interface PricingProps {
+  onPlanSelect?: (plan: string) => void;
+}
+
 const plans = [
   {
     name: "Free",
@@ -10,13 +14,12 @@ const plans = [
     description: "For anyone who wants to start knowing",
     features: [
       "10 checks per day",
-      "All modalities (images, video, text, audio, calls)",
+      "Text, images, audio, video",
       "1 device",
       "Tap-to-check",
-      "Stealth mode",
     ],
     cta: "Get started free",
-    ctaHref: "#download",
+    planKey: "free",
     highlight: false,
   },
   {
@@ -25,14 +28,14 @@ const plans = [
     description: "For people who want unlimited protection",
     features: [
       "Unlimited checks",
-      "All modalities",
+      "All content types",
       "All your devices",
-      "Auto-detect",
+      "Stealth mode",
       "Always-On mode",
       "Priority detection",
     ],
     cta: "Get Pro",
-    ctaHref: "/checkout?plan=pro",
+    planKey: "pro",
     highlight: true,
   },
   {
@@ -46,13 +49,27 @@ const plans = [
       "Separate profiles per member",
     ],
     cta: "Get Family",
-    ctaHref: "/checkout?plan=family",
+    planKey: "family",
     highlight: false,
   },
 ];
 
-export default function Pricing() {
+export default function Pricing({ onPlanSelect }: PricingProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [toast, setToast] = useState<string | null>(null);
+
+  function handleCta(plan: (typeof plans)[0]) {
+    if (plan.planKey === "free") {
+      document.getElementById("download")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    if (onPlanSelect) {
+      onPlanSelect(plan.planKey);
+    } else {
+      setToast("Coming soon — payment will be available shortly!");
+      setTimeout(() => setToast(null), 3000);
+    }
+  }
 
   return (
     <section id="pricing" className="py-32 px-6">
@@ -124,16 +141,22 @@ export default function Pricing() {
                 )}
 
                 <div className="mb-6">
-                  <h3 className={`text-xl font-bold mb-1 ${plan.highlight ? "text-white" : "text-sky-950"}`}>
+                  <h3
+                    className={`text-xl font-bold mb-1 ${plan.highlight ? "text-white" : "text-sky-950"}`}
+                  >
                     {plan.name}
                   </h3>
-                  <p className={`text-sm ${plan.highlight ? "text-sky-100" : "text-sky-500"}`}>
+                  <p
+                    className={`text-sm ${plan.highlight ? "text-sky-100" : "text-sky-500"}`}
+                  >
                     {plan.description}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <span className={`text-4xl font-bold ${plan.highlight ? "text-white" : "text-sky-950"}`}>
+                  <span
+                    className={`text-4xl font-bold ${plan.highlight ? "text-white" : "text-sky-950"}`}
+                  >
                     {priceLabel}
                   </span>
                 </div>
@@ -141,7 +164,9 @@ export default function Pricing() {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3 text-sm">
-                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? "text-sky-100" : "text-sky-500"}`} />
+                      <Check
+                        className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? "text-sky-100" : "text-sky-500"}`}
+                      />
                       <span className={plan.highlight ? "text-sky-50" : "text-sky-700"}>
                         {feature}
                       </span>
@@ -149,8 +174,8 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <a
-                  href={plan.ctaHref}
+                <button
+                  onClick={() => handleCta(plan)}
                   className={`block w-full py-3 rounded-full text-sm font-semibold text-center transition-all ${
                     plan.highlight
                       ? "bg-white hover:bg-sky-50 text-sky-600"
@@ -158,12 +183,18 @@ export default function Pricing() {
                   }`}
                 >
                   {plan.cta}
-                </a>
+                </button>
               </div>
             );
           })}
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-900 text-white px-6 py-3 rounded-full text-sm shadow-lg z-50 pointer-events-none">
+          {toast}
+        </div>
+      )}
     </section>
   );
 }

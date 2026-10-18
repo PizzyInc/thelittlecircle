@@ -30,6 +30,22 @@ async function detectText(text: string) {
   } as const;
 }
 
+// ─── Audio detection (mock) ───────────────────────────────────────────────────
+
+async function detectAudio(_base64: string) {
+  // No real API yet — mock result for UI development
+  const ai = Math.random() > 0.4;
+  return { verdict: ai ? "ai" : "real", confidence: 60 + Math.floor(Math.random() * 35), provider: "mock" } as const;
+}
+
+// ─── Video detection (mock) ───────────────────────────────────────────────────
+
+async function detectVideo(_base64: string) {
+  // No real API yet — mock result for UI development
+  const ai = Math.random() > 0.4;
+  return { verdict: ai ? "ai" : "real", confidence: 60 + Math.floor(Math.random() * 35), provider: "mock" } as const;
+}
+
 // ─── Image detection via Hive AI ─────────────────────────────────────────────
 
 async function detectImage(base64: string) {
@@ -101,7 +117,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const { type, content, filename } = body as {
-    type: "text" | "image";
+    type: "text" | "image" | "audio" | "video";
     content: string;
     filename?: string;
   };
@@ -111,10 +127,20 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = type === "text" ? await detectText(content) : await detectImage(content);
+    let result: Awaited<ReturnType<typeof detectText>>;
+    if (type === "text") {
+      result = await detectText(content);
+    } else if (type === "image") {
+      result = await detectImage(content);
+    } else if (type === "audio") {
+      result = await detectAudio(content);
+    } else {
+      result = await detectVideo(content);
+    }
 
     // Save to DB in background — skipped for anonymous (extension without login)
-    const inputPreview = type === "text" ? content.slice(0, 200) : (filename ?? "image");
+    const inputPreview =
+      type === "text" ? content.slice(0, 200) : (filename ?? type);
     if (user) supabase.from("detections").insert({
       user_id: user.id,
       type,

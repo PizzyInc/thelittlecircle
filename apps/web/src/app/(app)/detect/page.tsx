@@ -1,64 +1,111 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Upload, FileText, Image as ImageIcon } from "lucide-react";
+import { Upload, FileText, Image as ImageIcon, Mic, Video } from "lucide-react";
 
-type Tab = "text" | "image";
+type Tab = "text" | "image" | "audio" | "video";
 type Result = { verdict: "ai" | "real"; confidence: number };
+
+const TAB_CONFIG: {
+  id: Tab;
+  label: string;
+  icon: React.ReactNode;
+  accept: string;
+  acceptLabel: string;
+  maxMB?: number;
+}[] = [
+  { id: "text", label: "Text", icon: <FileText size={14} />, accept: "", acceptLabel: "" },
+  { id: "image", label: "Image", icon: <ImageIcon size={14} />, accept: "image/*", acceptLabel: "JPG, PNG, GIF, WebP" },
+  { id: "audio", label: "Audio", icon: <Mic size={14} />, accept: ".mp3,.wav,.m4a,.ogg,.webm", acceptLabel: "MP3, WAV, M4A, OGG, WebM" },
+  { id: "video", label: "Video", icon: <Video size={14} />, accept: ".mp4,.mov,.webm,.avi", acceptLabel: "MP4, MOV, WebM, AVI", maxMB: 50 },
+];
 
 export default function DetectPage() {
   const [tab, setTab] = useState<Tab>("text");
   const [text, setText] = useState("");
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [imageFilename, setImageFilename] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Per-tab file state
+  const [fileBase64, setFileBase64] = useState<Partial<Record<Tab, string>>>({});
+  const [fileFilename, setFileFilename] = useState<Partial<Record<Tab, string>>>({});
+  const [filePreview, setFilePreview] = useState<Partial<Record<Tab, string>>>({});
+  const [fileSizeMB, setFileSizeMB] = useState<Partial<Record<Tab, number>>>({});
+
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  function loadImageFile(file: File) {
-    setImageFilename(file.name);
+  function loadFile(file: File, targetTab: Tab) {
+    const mb = file.size / 1024 / 1024;
+    setFileSizeMB((prev) => ({ ...prev, [targetTab]: mb }));
+    setFileFilename((prev) => ({ ...prev, [targetTab]: file.name }));
+    setResult(null);
+    setError("");
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const src = e.target?.result as string;
-      setImageBase64(src);
-      setImagePreview(src);
-      setResult(null);
+      setFileBase64((prev) => ({ ...prev, [targetTab]: src }));
+      // Only set a visual preview for image files
+      if (file.type.startsWith("image/")) {
+        setFilePreview((prev) => ({ ...prev, [targetTab]: src }));
+      } else {
+        setFilePreview((prev) => ({ ...prev, [targetTab]: undefined }));
+      }
     };
     reader.readAsDataURL(file);
   }
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  function clearFile(t: Tab) {
+    setFileBase64((prev) => { const n = { ...prev }; delete n[t]; return n; });
+    setFileFilename((prev) => { const n = { ...prev }; delete n[t]; return n; });
+    setFilePreview((prev) => { const n = { ...prev }; delete n[t]; return n; });
+    setFileSizeMB((prev) => { const n = { ...prev }; delete n[t]; return n; });
+    setResult(null);
+    setError("");
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent, targetTab: Tab) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file?.type.startsWith("image/")) loadImageFile(file);
+    if (!file) return;
+    loadFile(file, targetTab);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleAnalyze() {
     setError("");
     setResult(null);
+
     if (tab === "text" && text.trim().length < 50) {
       setError("Paste at least 50 characters to analyze.");
       return;
     }
-    if (tab === "image" && !imageBase64) {
-      setError("Upload an image first.");
+    if (tab !== "text" && !fileBase64[tab]) {
+      setError("Upload a file first.");
+      return;
+    }
+
+    const tabConfig = TAB_CONFIG.find((t) => t.id === tab)!;
+    const mb = fileSizeMB[tab] ?? 0;
+    if (tabConfig.maxMB && mb > tabConfig.maxMB) {
+      setError(`File is ${mb.toFixed(1)} MB — please keep video files under ${tabConfig.maxMB} MB.`);
       return;
     }
 
     setLoading(true);
     try {
+      const body =
+        tab === "text"
+          ? { type: "text", content: text }
+          : { type: tab, content: fileBase64[tab], filename: fileFilename[tab] };
+
       const res = await fetch("/api/detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          tab === "text"
-            ? { type: "text", content: text }
-            : { type: "image", content: imageBase64, filename: imageFilename }
-        ),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Detection failed.");
@@ -70,30 +117,33 @@ export default function DetectPage() {
     }
   }
 
-  const canAnalyze = tab === "text" ? text.trim().length >= 50 : !!imageBase64;
+  const canAnalyze =
+    tab === "text" ? text.trim().length >= 50 : !!fileBase64[tab];
+
+  const tabConfig = TAB_CONFIG.find((t) => t.id === tab)!;
 
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-sky-950">Check content</h1>
         <p className="text-sky-500 text-sm mt-1">
-          Paste text or upload an image to check if it&apos;s AI-generated.
+          Paste text or upload a file to check if it&apos;s AI-generated.
         </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-sky-200 p-6 shadow-sm">
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {(["text", "image"] as Tab[]).map((t) => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {TAB_CONFIG.map((t) => (
             <button
-              key={t}
-              onClick={() => { setTab(t); setResult(null); setError(""); }}
+              key={t.id}
+              onClick={() => { setTab(t.id); setResult(null); setError(""); }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                tab === t ? "bg-sky-500 text-white" : "bg-sky-50 text-sky-500 hover:bg-sky-100"
+                tab === t.id ? "bg-sky-500 text-white" : "bg-sky-50 text-sky-500 hover:bg-sky-100"
               }`}
             >
-              {t === "text" ? <FileText size={14} /> : <ImageIcon size={14} />}
-              {t === "text" ? "Text" : "Image"}
+              {t.icon}
+              {t.label}
             </button>
           ))}
         </div>
@@ -108,44 +158,71 @@ export default function DetectPage() {
             className="w-full px-4 py-3 rounded-2xl border border-sky-200 text-sm text-sky-900 placeholder:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-sky-50/40 resize-none"
           />
         ) : (
-          <div
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleDrop}
-            onClick={() => !imagePreview && fileRef.current?.click()}
-            className={`relative rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
-              dragOver ? "border-sky-400 bg-sky-50" : "border-sky-200 hover:border-sky-300 bg-sky-50/40"
-            }`}
-            style={{ minHeight: 200 }}
-          >
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) loadImageFile(f); }}
-            />
-            {imagePreview ? (
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="Preview" className="w-full max-h-64 object-contain p-4" />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setImageBase64(null); setImagePreview(null); setResult(null); }}
-                  className="absolute top-3 right-3 text-xs text-sky-500 bg-white border border-sky-200 rounded-lg px-3 py-1.5 hover:bg-sky-50 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-14 gap-3">
-                <Upload size={28} className="text-sky-300" />
-                <p className="text-sky-400 text-sm text-center">
-                  Drop an image here or <span className="text-sky-500 font-medium">browse</span>
-                </p>
-                <p className="text-sky-300 text-xs">JPG, PNG, GIF, WebP</p>
-              </div>
+          <>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => handleDrop(e, tab)}
+              onClick={() => !fileBase64[tab] && fileRef.current?.click()}
+              className={`relative rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
+                dragOver ? "border-sky-400 bg-sky-50" : "border-sky-200 hover:border-sky-300 bg-sky-50/40"
+              }`}
+              style={{ minHeight: 200 }}
+            >
+              <input
+                key={tab}
+                ref={fileRef}
+                type="file"
+                accept={tabConfig.accept}
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) loadFile(f, tab); }}
+              />
+              {fileBase64[tab] ? (
+                <div className="relative">
+                  {filePreview[tab] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={filePreview[tab]} alt="Preview" className="w-full max-h-64 object-contain p-4" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-14 gap-3">
+                      {tab === "audio" ? (
+                        <Mic size={32} className="text-sky-400" />
+                      ) : (
+                        <Video size={32} className="text-sky-400" />
+                      )}
+                      <p className="text-sky-700 text-sm font-medium">{fileFilename[tab]}</p>
+                      {fileSizeMB[tab] !== undefined && (
+                        <p className="text-sky-400 text-xs">{fileSizeMB[tab]!.toFixed(1)} MB</p>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); clearFile(tab); }}
+                    className="absolute top-3 right-3 text-xs text-sky-500 bg-white border border-sky-200 rounded-lg px-3 py-1.5 hover:bg-sky-50 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-14 gap-3">
+                  <Upload size={28} className="text-sky-300" />
+                  <p className="text-sky-400 text-sm text-center">
+                    Drop a file here or <span className="text-sky-500 font-medium">browse</span>
+                  </p>
+                  <p className="text-sky-300 text-xs">{tabConfig.acceptLabel}</p>
+                  {tabConfig.maxMB && (
+                    <p className="text-sky-300 text-xs">Max {tabConfig.maxMB} MB</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Video size warning */}
+            {tab === "video" && fileSizeMB[tab] !== undefined && fileSizeMB[tab]! > 50 && (
+              <p className="mt-3 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                This file is {fileSizeMB[tab]!.toFixed(1)} MB — video files over 50 MB may be too large to process. Consider a shorter clip.
+              </p>
             )}
-          </div>
+          </>
         )}
 
         {/* Error */}
