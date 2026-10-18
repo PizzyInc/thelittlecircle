@@ -92,7 +92,7 @@ const CYCLE: Array<[CircleState, number]> = [
 
 export default function Hero() {
   const [idx, setIdx] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<"android" | "ios" | null>(null);
 
   const state = CYCLE[idx][0];
   const cfg = stateCfg[state];
@@ -104,7 +104,6 @@ export default function Hero() {
     return () => clearTimeout(t);
   }, [idx]);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (showModal) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -253,22 +252,16 @@ export default function Hero() {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8 w-full max-w-xs sm:max-w-none sm:w-auto" id="download">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 w-full max-w-xs sm:max-w-none sm:w-auto" id="download">
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => setShowModal("android")}
             className="px-8 py-4 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-full text-sm sm:text-base transition-all hover:scale-105 glow-sky-sm text-center w-full sm:w-auto"
           >
-            Download for iOS
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="px-8 py-4 border-2 border-sky-400 hover:border-sky-600 text-sky-700 hover:text-sky-900 font-semibold rounded-full text-sm sm:text-base transition-all hover:bg-sky-100 text-center w-full sm:w-auto"
-          >
-            Download for Android
+            Get Android App
           </button>
           <Link
             href="/dashboard"
-            className="px-8 py-4 border-2 border-sky-200 hover:border-sky-400 text-sky-500 hover:text-sky-800 font-semibold rounded-full text-sm sm:text-base transition-all hover:bg-sky-50 text-center w-full sm:w-auto flex items-center justify-center gap-2"
+            className="px-8 py-4 border-2 border-sky-400 hover:border-sky-600 text-sky-700 hover:text-sky-900 font-semibold rounded-full text-sm sm:text-base transition-all hover:bg-sky-100 text-center w-full sm:w-auto flex items-center justify-center gap-2"
           >
             <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth={1.8}>
               <circle cx="12" cy="12" r="10" />
@@ -278,65 +271,135 @@ export default function Hero() {
           </Link>
         </div>
 
-        <p className="text-sm text-sky-400 text-center mb-2">
+        <p className="text-sm text-sky-400 text-center mb-1">
           Free to get started. No credit card required.
         </p>
-        <p className="text-xs text-sky-400 text-center">
-          Chrome extension available now. iOS and Android apps launching soon.
+        <p className="text-xs text-sky-400 text-center mb-1">
+          Chrome extension available now · Android app coming soon
         </p>
+        <button
+          onClick={() => setShowModal("ios")}
+          className="text-xs text-sky-300 hover:text-sky-500 underline underline-offset-2 transition-colors"
+        >
+          On iOS? See what&apos;s available →
+        </button>
       </section>
 
-      {/* "Apps in development" modal */}
-      {showModal && (
+      {/* Android modal */}
+      {showModal === "android" && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6"
           style={{ background: "rgba(14, 30, 54, 0.5)", backdropFilter: "blur(4px)" }}
-          onClick={() => setShowModal(false)}
+          onClick={() => setShowModal(null)}
         >
           <div
             className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl shadow-sky-200 text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Sleepy/patient circle face */}
             <div
               className="mx-auto mb-6 rounded-full flex flex-col items-center justify-center"
               style={{
-                width: 80,
-                height: 80,
+                width: 80, height: 80,
                 background: "linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%)",
                 boxShadow: "0 6px 24px rgba(255,180,150,0.4)",
               }}
             >
-              <div className="flex items-center gap-3 mb-1">
+              <div className="flex items-center gap-3">
                 {[0, 1].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-full bg-white flex items-center justify-center"
-                    style={{ width: 14, height: 14 }}
-                  >
+                  <div key={i} className="rounded-full bg-white flex items-center justify-center" style={{ width: 14, height: 14 }}>
                     <div className="rounded-full" style={{ width: 8, height: 8, background: "#2c2c2c" }} />
                   </div>
                 ))}
               </div>
             </div>
 
-            <h2 className="text-lg font-bold text-sky-950 mb-2">iOS and Android apps coming soon</h2>
-            <p className="text-sky-500 text-sm leading-relaxed mb-6">
-              The mobile apps are in development. Right now you can use The Little Circle in your browser or install the Chrome extension to get it on every website.
+            <h2 className="text-lg font-bold text-sky-950 mb-2">Android app coming soon</h2>
+            <p className="text-sky-500 text-sm leading-relaxed mb-2">
+              The Android app will float the circle over every app on your phone — social media, messages, news, anything.
+            </p>
+            <p className="text-sky-400 text-sm leading-relaxed mb-6">
+              For now, use the browser or Chrome extension while the app is in development.
             </p>
 
             <Link
               href="/dashboard"
               className="block w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-sm transition-colors mb-3"
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowModal(null)}
             >
-              Use in browser
+              Use in browser now
             </Link>
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowModal(null)}
               className="w-full py-2.5 text-sky-400 hover:text-sky-600 text-sm transition-colors"
             >
-              Maybe later
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* iOS modal */}
+      {showModal === "ios" && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6"
+          style={{ background: "rgba(14, 30, 54, 0.5)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowModal(null)}
+        >
+          <div
+            className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl shadow-red-100 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Circle with X badge */}
+            <div className="relative mx-auto mb-6" style={{ width: 80, height: 80 }}>
+              <div
+                className="rounded-full flex flex-col items-center justify-center w-full h-full"
+                style={{
+                  background: "linear-gradient(145deg, #ffe8dc 0%, #ffd4c4 100%)",
+                  boxShadow: "0 6px 24px rgba(255,180,150,0.4)",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="rounded-full bg-white flex items-center justify-center" style={{ width: 14, height: 14 }}>
+                      <div className="rounded-full" style={{ width: 8, height: 8, background: "#2c2c2c" }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm border-2 border-white">
+                ✕
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-sky-950 mb-2">Live circle not available on iOS</h2>
+            <p className="text-sky-500 text-sm leading-relaxed mb-4">
+              Apple doesn&apos;t allow apps to float over others or read screen content from other apps. The live circle works on <strong>Android</strong> and <strong>desktop Chrome</strong>.
+            </p>
+
+            <div className="bg-sky-50 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-sky-700 text-xs font-semibold mb-2">What you can do on iOS:</p>
+              <div className="flex flex-wrap gap-2">
+                {["AI Text", "Audio", "Images", "Video"].map((item) => (
+                  <span key={item} className="text-xs text-sky-600 bg-white border border-sky-200 px-3 py-1 rounded-full font-medium">
+                    ✓ {item}
+                  </span>
+                ))}
+              </div>
+              <p className="text-sky-400 text-xs mt-2">Paste or upload content to check it manually.</p>
+            </div>
+
+            <Link
+              href="/dashboard"
+              className="block w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-sm transition-colors mb-3"
+              onClick={() => setShowModal(null)}
+            >
+              Use manual detection
+            </Link>
+            <button
+              onClick={() => setShowModal(null)}
+              className="w-full py-2.5 text-sky-400 hover:text-sky-600 text-sm transition-colors"
+            >
+              Got it
             </button>
           </div>
         </div>

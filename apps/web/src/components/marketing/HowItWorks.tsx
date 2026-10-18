@@ -1,8 +1,8 @@
 const steps = [
   {
     number: "01",
-    title: "Install on any device",
-    description: "iOS, Android, or install the browser extension to get The Little Circle running on every website you visit.",
+    title: "Get it on your device",
+    description: "Android app, Chrome extension, or use it in any browser. The live circle floats over every app on Android and every website on desktop.",
   },
   {
     number: "02",
