@@ -315,13 +315,13 @@ export default function FloatingCircle() {
     const lines =
       verdict === "ai"
         ? [
-            `Looks AI-generated to me — ${confidence}% sure.`,
-            `I'm detecting AI here. About ${confidence}% confident.`,
+            `Looks AI-generated to me. ${confidence}% sure.`,
+            `I'm detecting AI here, about ${confidence}% confident.`,
             `That's AI. ${name} is ${confidence}% certain.`,
           ]
         : [
             `This looks real. ${confidence}% confident.`,
-            `Seems genuine to me — around ${confidence}%.`,
+            `Seems genuine to me, around ${confidence}%.`,
             `I think a person made this. ${confidence}% sure.`,
           ];
     const text = lines[Math.floor(Math.random() * lines.length)];

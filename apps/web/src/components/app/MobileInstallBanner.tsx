@@ -155,7 +155,7 @@ export default function MobileInstallBanner() {
               Get the Android app
             </p>
             <p style={{ fontSize: 12, color: "#1d4ed8", lineHeight: 1.6, marginBottom: 8 }}>
-              The AI or Not app floats over every app on your phone — social media, messages, anything — and tells you what&apos;s real in real time.
+              The Little Circle floats over every app on your phone: social media, messages, anything. It tells you what&apos;s real in real time.
             </p>
             <a
               href="/download"

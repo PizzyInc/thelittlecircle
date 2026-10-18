@@ -319,7 +319,7 @@ export default function Hero() {
 
             <h2 className="text-lg font-bold text-sky-950 mb-2">Get the Android app</h2>
             <p className="text-sky-500 text-sm leading-relaxed mb-2">
-              The circle floats over every app on your phone — social media, messages, news, anything — and tells you what&apos;s real in real time.
+              The Little Circle floats over every app on your phone: social media, messages, news feeds, anything. It tells you what&apos;s real in real time.
             </p>
             <p className="text-sky-400 text-sm leading-relaxed mb-6">
               Download from the Play Store or use in the browser while you wait for the app to arrive on your device.

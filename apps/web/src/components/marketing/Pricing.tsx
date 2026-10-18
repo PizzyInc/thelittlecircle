@@ -66,7 +66,7 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
     if (onPlanSelect) {
       onPlanSelect(plan.planKey);
     } else {
-      setToast("Coming soon — payment will be available shortly!");
+      setToast("Coming soon. Payment will be available shortly!");
       setTimeout(() => setToast(null), 3000);
     }
   }

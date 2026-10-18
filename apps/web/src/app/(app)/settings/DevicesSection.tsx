@@ -125,7 +125,7 @@ export default function DevicesSection() {
                     onClick={() => toggleCircle(device.id, device.circle_active)}
                     role="switch"
                     aria-checked={device.circle_active}
-                    title={device.circle_active ? "Circle is on — tap to turn off" : "Circle is off — tap to turn on"}
+                    title={device.circle_active ? "Circle is on. Tap to turn off." : "Circle is off. Tap to turn on."}
                     className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 ${
                       device.circle_active ? "bg-sky-500" : "bg-sky-200"
                     }`}

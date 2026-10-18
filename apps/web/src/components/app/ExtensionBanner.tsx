@@ -84,8 +84,7 @@ export default function ExtensionBanner() {
       </div>
 
       <p style={{ fontSize: 13, color: "#0369a1", flex: 1, margin: 0 }}>
-        <strong>Get The Little Circle on every tab</strong> — install the Chrome
-        extension to see it floating as you browse.
+        <strong>Get The Little Circle on every tab.</strong> Install the Chrome extension to see it floating as you browse.
       </p>
 
       <a

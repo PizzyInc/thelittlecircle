@@ -103,7 +103,7 @@ export default function CircleToggleCard() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-sky-900">{name}</p>
           <p className="text-xs text-sky-400 mt-0.5">
-            {active ? `Active on this device — tap ${name} to scan` : `${name} is off on this device`}
+            {active ? `Active on this device. Tap ${name} to scan.` : `${name} is off on this device`}
           </p>
         </div>
 
@@ -156,7 +156,7 @@ export default function CircleToggleCard() {
           </div>
           <p className="text-xs text-sky-400 mt-0.5">
             {isPro
-              ? (voice ? `Say "hey ${name}" to check anything out loud` : `Off — say "hey ${name}" to activate`)
+              ? (voice ? `Say "hey ${name}" to check anything out loud` : `Off. Say "hey ${name}" to activate.`)
               : <a href="/#pricing" className="text-violet-400 hover:text-violet-600 transition-colors">Upgrade to Pro to enable</a>
             }
           </p>
