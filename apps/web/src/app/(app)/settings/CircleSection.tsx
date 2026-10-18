@@ -28,6 +28,7 @@ export default function CircleSection() {
   }
 
   function toggleStealth() {
+    if (!isPro) return;
     const next = !stealth;
     setStealth(next);
     localStorage.setItem("tlc_stealth", String(next));
@@ -119,23 +120,34 @@ export default function CircleSection() {
         {/* Stealth mode */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-sky-800">Stealth mode</p>
-            <p className="text-sky-400 text-xs mt-0.5 max-w-xs">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <p className="text-sm font-medium text-sky-800">Stealth mode</p>
+              {!isPro && (
+                <span className="text-[10px] bg-sky-100 text-sky-500 px-1.5 py-0.5 rounded-full font-medium">Pro</span>
+              )}
+            </div>
+            <p className="text-sky-400 text-xs max-w-xs">
               When on, the circle hides itself and only appears when AI content is detected.
               When off (default), the circle is always visible.
             </p>
+            {!isPro && (
+              <a href="/#pricing" className="text-xs text-sky-500 font-medium mt-1 inline-block hover:text-sky-700 transition-colors">
+                Upgrade to Pro →
+              </a>
+            )}
           </div>
           <button
             onClick={toggleStealth}
             role="switch"
             aria-checked={stealth}
+            disabled={!isPro}
             className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 ${
-              stealth ? "bg-sky-500" : "bg-sky-200"
-            }`}
+              !isPro ? "opacity-40 cursor-not-allowed" : ""
+            } ${stealth && isPro ? "bg-sky-500" : "bg-sky-200"}`}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                stealth ? "translate-x-5" : "translate-x-0"
+                stealth && isPro ? "translate-x-5" : "translate-x-0"
               }`}
             />
           </button>
