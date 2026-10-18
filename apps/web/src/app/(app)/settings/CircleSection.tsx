@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import PricingModal from "@/components/app/PricingModal";
 
 export default function CircleSection() {
   const [name, setName] = useState("Circle");
@@ -8,6 +9,7 @@ export default function CircleSection() {
   const [stealth, setStealth] = useState(false);
   const [voice, setVoice] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -95,9 +97,9 @@ export default function CircleSection() {
               {name !== "Circle" ? ` ${name} will listen and respond.` : " Your companion will listen and respond."}
             </p>
             {!isPro && (
-              <a href="/#pricing" className="text-xs text-sky-500 font-medium mt-1 inline-block hover:text-sky-700 transition-colors">
+              <button onClick={() => setShowPricingModal(true)} className="text-xs text-sky-500 font-medium mt-1 hover:text-sky-700 transition-colors">
                 Upgrade to Pro →
-              </a>
+              </button>
             )}
           </div>
           <button
@@ -131,9 +133,9 @@ export default function CircleSection() {
               When off (default), the circle is always visible.
             </p>
             {!isPro && (
-              <a href="/#pricing" className="text-xs text-sky-500 font-medium mt-1 inline-block hover:text-sky-700 transition-colors">
+              <button onClick={() => setShowPricingModal(true)} className="text-xs text-sky-500 font-medium mt-1 hover:text-sky-700 transition-colors">
                 Upgrade to Pro →
-              </a>
+              </button>
             )}
           </div>
           <button
@@ -154,5 +156,15 @@ export default function CircleSection() {
         </div>
       </div>
     </div>
+
+    <PricingModal
+      open={showPricingModal}
+      onClose={() => setShowPricingModal(false)}
+      onSubscribe={(plan) => {
+        localStorage.setItem("tlc_plan", plan);
+        setIsPro(true);
+        setShowPricingModal(false);
+      }}
+    />
   );
 }

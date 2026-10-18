@@ -73,7 +73,7 @@ async function extractContent(cx: number, cy: number): Promise<{
     }
   }
 
-  // 2. Pull main content text — prefer article/main over full body
+  // 2. Pull text — prefer article/main, fall back to full body
   const container = (
     document.querySelector("article") ??
     document.querySelector('[role="main"]') ??
@@ -82,17 +82,17 @@ async function extractContent(cx: number, cy: number): Promise<{
   ) as HTMLElement;
 
   const paras = Array.from(
-    container.querySelectorAll("p, h1, h2, h3, li, blockquote, td")
+    container.querySelectorAll("p, h1, h2, h3, h4, li, blockquote, td, span, div")
   )
     .map((e) => (e as HTMLElement).innerText?.replace(/\s+/g, " ").trim())
-    .filter((t): t is string => !!t && t.length > 40);
+    .filter((t): t is string => !!t && t.length > 20);
 
-  let text = paras.join(" ");
-  if (text.length < 100) {
-    text = container.innerText.replace(/\s+/g, " ").trim();
+  let text = [...new Set(paras)].join(" ");
+  if (text.length < 50) {
+    text = document.body.innerText.replace(/\s+/g, " ").trim();
   }
 
-  return { type: "text", content: text.slice(0, 3000), el: container };
+  return { type: "text", content: text.slice(0, 4000), el: container };
 }
 
 export default function FloatingCircle() {
@@ -323,9 +323,9 @@ export default function FloatingCircle() {
     setState("analyzing");
     const { type, content, el } = await extractContent(cx, cy);
 
-    if (type === "text" && content.length < 250) {
+    if (content.length < 10) {
       setState("idle");
-      setBubble({ verdict: "info", message: "Not enough text to scan" });
+      setBubble({ verdict: "info", message: "Nothing to scan here" });
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
       return;
@@ -399,9 +399,9 @@ export default function FloatingCircle() {
     setState("analyzing");
     const { type, content, el } = await extractContent(cx, cy);
 
-    if (type === "text" && content.length < 250) {
+    if (content.length < 10) {
       setState("idle");
-      setBubble({ verdict: "info", message: "Not enough text to scan" });
+      setBubble({ verdict: "info", message: "Nothing to scan here" });
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
       return;
@@ -432,6 +432,7 @@ export default function FloatingCircle() {
       const verdict = data.verdict as "ai" | "real";
       setState(verdict);
       setBubble({ verdict, confidence: data.confidence });
+      if (voiceEnabled && isPro) speak(verdict, data.confidence);
 
       if (stealthMode) setStealthVisible(true);
 
@@ -447,9 +448,10 @@ export default function FloatingCircle() {
       clearTimeout(timeoutId);
       removeHighlight();
       setState("idle");
-      const isAbort = err instanceof Error && err.name === "AbortError";
-      setBubble(null);
-      if (!isAbort) console.warn("Detection error:", err);
+      setBubble({ verdict: "info", message: "Scan failed — try again" });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
+      if (!(err instanceof Error && err.name === "AbortError")) console.warn("Detection error:", err);
     }
   }
 

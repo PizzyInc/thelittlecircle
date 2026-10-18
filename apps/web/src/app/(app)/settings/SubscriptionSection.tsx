@@ -44,9 +44,9 @@ export default function SubscriptionSection() {
         <p className="text-xs text-sky-500">
           You&apos;re on the{" "}
           <span className="font-semibold text-sky-700">{label}</span> plan.{" "}
-          <a href="/#pricing" className="underline hover:text-sky-700 transition-colors">
+          <button onClick={() => setShowPricingModal(true)} className="underline hover:text-sky-700 transition-colors">
             Manage
-          </a>
+          </button>
         </p>
       ) : (
         <div className="border border-dashed border-sky-200 rounded-xl p-4">
