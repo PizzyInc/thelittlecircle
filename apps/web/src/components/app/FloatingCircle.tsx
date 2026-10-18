@@ -109,6 +109,7 @@ export default function FloatingCircle() {
   const [isPro, setIsPro] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceReady, setVoiceReady] = useState(false); // name heard, now capturing query
+  const [eyeRolling, setEyeRolling] = useState(false);
 
   const dragStart = useRef({ mx: 0, my: 0, bx: 0, by: 0 });
   const pointerDownTime = useRef(0);
@@ -326,8 +327,10 @@ export default function FloatingCircle() {
     if (content.length < 10) {
       setState("idle");
       setBubble({ verdict: "info", message: "Nothing to scan here" });
+      setEyeRolling(true);
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
+      setTimeout(() => setEyeRolling(false), 1600);
       return;
     }
 
@@ -402,8 +405,10 @@ export default function FloatingCircle() {
     if (content.length < 10) {
       setState("idle");
       setBubble({ verdict: "info", message: "Nothing to scan here" });
+      setEyeRolling(true);
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
+      setTimeout(() => setEyeRolling(false), 1600);
       return;
     }
 
@@ -488,7 +493,8 @@ export default function FloatingCircle() {
   const s = STATE_STYLES[state];
   const isAnalyzing = state === "analyzing";
   const showMouth = state === "ai" || state === "real";
-  const eyeScaleY = blinkEye && state === "idle" ? 0.1 : 1;
+  const eyeScaleY = eyeRolling ? 0.55 : (blinkEye && state === "idle" ? 0.1 : 1);
+  const activePupil = eyeRolling ? { x: 0, y: -3.5 } : pupil;
 
   // Circle disabled on this device — render nothing
   if (!circleActive) return null;
@@ -636,9 +642,9 @@ export default function FloatingCircle() {
                   background: "#2c2c2c",
                   borderRadius: "50%",
                   position: "relative",
-                  transform: isAnalyzing ? undefined : `translate(${pupil.x}px, ${pupil.y}px)`,
+                  transform: isAnalyzing ? undefined : `translate(${activePupil.x}px, ${activePupil.y}px)`,
                   animation: isAnalyzing ? "circlePupilLook 1.2s ease-in-out infinite" : undefined,
-                  transition: isAnalyzing ? undefined : "transform 0.1s ease",
+                  transition: isAnalyzing ? undefined : "transform 0.25s ease",
                   flexShrink: 0,
                 }}
               >
