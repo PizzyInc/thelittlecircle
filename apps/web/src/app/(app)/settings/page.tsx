@@ -4,6 +4,7 @@ import DevicesSection from "./DevicesSection";
 import CircleSection from "./CircleSection";
 import SubscriptionSection from "./SubscriptionSection";
 import NotificationsSection from "./NotificationsSection";
+import DangerZoneSection from "./DangerZoneSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -34,6 +35,8 @@ export default async function SettingsPage() {
         <SubscriptionSection />
 
         <NotificationsSection />
+
+        <DangerZoneSection />
       </div>
     </div>
   );

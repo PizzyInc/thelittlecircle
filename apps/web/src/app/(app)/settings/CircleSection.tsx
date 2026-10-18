@@ -46,6 +46,7 @@ export default function CircleSection() {
   }
 
   return (
+    <>
     <div className="bg-white rounded-2xl border border-sky-200 p-6">
       <h2 className="text-sm font-semibold text-sky-900 mb-1">Circle behavior</h2>
       <p className="text-sky-400 text-xs mb-5">Control how your circle appears and responds.</p>
@@ -166,5 +167,6 @@ export default function CircleSection() {
         setShowPricingModal(false);
       }}
     />
+    </>
   );
 }
