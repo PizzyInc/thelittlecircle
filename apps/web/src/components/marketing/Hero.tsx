@@ -285,7 +285,7 @@ export default function Hero() {
           Free to get started. No credit card required.
         </p>
         <p className="text-xs text-sky-400 text-center">
-          Chrome extension available now · Android app coming soon · iOS: manual detection
+          Chrome extension · Android app · iOS: manual detection
         </p>
       </section>
 
@@ -317,20 +317,29 @@ export default function Hero() {
               </div>
             </div>
 
-            <h2 className="text-lg font-bold text-sky-950 mb-2">Android app coming soon</h2>
+            <h2 className="text-lg font-bold text-sky-950 mb-2">Get the Android app</h2>
             <p className="text-sky-500 text-sm leading-relaxed mb-2">
-              The Android app will float the circle over every app on your phone — social media, messages, news, anything.
+              The circle floats over every app on your phone — social media, messages, news, anything — and tells you what&apos;s real in real time.
             </p>
             <p className="text-sky-400 text-sm leading-relaxed mb-6">
-              For now, use the browser or Chrome extension while the app is in development.
+              Download from the Play Store or use in the browser while you wait for the app to arrive on your device.
             </p>
 
-            <Link
-              href="/dashboard"
-              className="block w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-sm transition-colors mb-3"
+            <a
+              href="https://play.google.com/store"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-sm transition-colors mb-3 text-center"
               onClick={() => setShowModal(null)}
             >
-              Use in browser now
+              Download on Google Play
+            </a>
+            <Link
+              href="/dashboard"
+              className="block w-full py-3.5 border border-sky-200 hover:bg-sky-50 text-sky-600 font-semibold rounded-xl text-sm transition-colors mb-3 text-center"
+              onClick={() => setShowModal(null)}
+            >
+              Use in browser instead
             </Link>
             <button
               onClick={() => setShowModal(null)}
