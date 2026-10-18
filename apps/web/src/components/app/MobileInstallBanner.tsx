@@ -17,14 +17,6 @@ export default function MobileInstallBanner() {
 
     if (localStorage.getItem(DISMISS_KEY) === "true") return;
 
-    // For iOS: always show the limitations notice (even in standalone — circle still won't float)
-    // For Android non-standalone: show install prompt
-    const isStandalone =
-      (window.navigator as any).standalone === true ||
-      window.matchMedia("(display-mode: standalone)").matches;
-
-    if (isAndroid && isStandalone) return;
-
     setPlatform(isIOS ? "ios" : "android");
     setShow(true);
   }, []);
@@ -116,12 +108,12 @@ export default function MobileInstallBanner() {
     );
   }
 
-  // Android — show install prompt
+  // Android — prompt to download the native app
   return (
     <div style={{ padding: "0 16px 12px" }}>
       <div style={{
-        background: "linear-gradient(135deg, #f0fdf4, #dcfce7)",
-        border: "1px solid #86efac",
+        background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+        border: "1px solid #93c5fd",
         borderRadius: 16,
         padding: "14px 16px",
         position: "relative",
@@ -132,7 +124,7 @@ export default function MobileInstallBanner() {
           style={{
             position: "absolute", top: 10, right: 10,
             background: "none", border: "none", cursor: "pointer",
-            color: "#4ade80", padding: 4,
+            color: "#93c5fd", padding: 4,
             display: "flex", alignItems: "center",
           }}
         >
@@ -158,19 +150,28 @@ export default function MobileInstallBanner() {
             </div>
           </div>
 
-          <div>
-            <p style={{ fontWeight: 700, fontSize: 13, color: "#14532d", marginBottom: 5 }}>
-              Get the full experience on Android
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 700, fontSize: 13, color: "#1e3a8a", marginBottom: 4 }}>
+              Get the Android app
             </p>
-            <p style={{ fontSize: 12, color: "#166534", lineHeight: 1.6 }}>
-              Tap <strong>⋮</strong> in Chrome →{" "}
-              <strong>Add to Home Screen</strong>. Then tap{" "}
-              <strong>Share</strong> in any app and choose{" "}
-              <strong>The Little Circle</strong> to check content instantly.
+            <p style={{ fontSize: 12, color: "#1d4ed8", lineHeight: 1.6, marginBottom: 8 }}>
+              The AI or Not app floats over every app on your phone — social media, messages, anything — and tells you what&apos;s real in real time.
             </p>
-            <p style={{ fontSize: 11, color: "#15803d", marginTop: 5 }}>
-              Native Android app with live circle overlay coming soon.
-            </p>
+            <a
+              href="/download"
+              style={{
+                display: "inline-block",
+                background: "#2563eb",
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 600,
+                padding: "6px 14px",
+                borderRadius: 20,
+                textDecoration: "none",
+              }}
+            >
+              Download Android app →
+            </a>
           </div>
         </div>
       </div>
