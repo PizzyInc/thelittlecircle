@@ -25,10 +25,19 @@ const SIZES = [
 ];
 
 function makeSplashSvg(w, h) {
-  const logoR = Math.round(Math.min(w, h) * 0.20);
+  const min = Math.min(w, h);
+  const logoR = Math.round(min * 0.20);
   const cx = w / 2;
-  const cy = h / 2;
+  // shift logo up so text fits below
+  const cy = Math.round(h * 0.40);
   const scale = (logoR * 2) / 512;
+
+  const titleSize    = Math.round(min * 0.058);
+  const subtitleSize = Math.round(min * 0.040);
+  const taglineSize  = Math.round(min * 0.031);
+  const textY1 = cy + logoR + Math.round(min * 0.085);
+  const textY2 = textY1 + Math.round(min * 0.065);
+  const textY3 = textY2 + Math.round(min * 0.052);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
   <defs>
@@ -51,6 +60,9 @@ function makeSplashSvg(w, h) {
     <circle cx="326" cy="248" r="34" fill="#2c2c2c"/>
     <circle cx="315" cy="237" r="13" fill="rgba(255,255,255,0.85)"/>
   </g>
+  <text x="${cx}" y="${textY1}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${titleSize}" font-weight="700" fill="#0c4a6e">The Little Circle</text>
+  <text x="${cx}" y="${textY2}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${subtitleSize}" fill="#0369a1">Your little companion</text>
+  <text x="${cx}" y="${textY3}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${taglineSize}" fill="#0ea5e9">made to help you know what&apos;s real</text>
 </svg>`;
 }
 

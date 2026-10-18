@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "generate-icons": "node scripts/generate-icons.mjs",
     "generate-splash": "node scripts/generate-splash-screens.mjs"
   },
   "dependencies": {

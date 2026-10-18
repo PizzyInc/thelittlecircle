@@ -4,7 +4,7 @@
   "description": "Your companion that tells you what's real.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#f0f9ff",
+  "background_color": "#fff8f5",
   "theme_color": "#0ea5e9",
   "orientation": "portrait-primary",
   "icons": [
