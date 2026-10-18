@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    let result: Awaited<ReturnType<typeof detectText>>;
+    let result: { verdict: "ai" | "real"; confidence: number; provider: string };
     if (type === "text") {
       result = await detectText(content);
     } else if (type === "image") {
