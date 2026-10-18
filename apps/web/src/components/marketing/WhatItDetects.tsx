@@ -66,7 +66,7 @@ export default function WhatItDetects() {
 
         <p className="text-center text-sky-400 text-sm mt-12">
           Detection powered by{" "}
-          <span className="text-sky-600 font-medium">Rantera</span>
+          <a href="https://rantera.ai" target="_blank" rel="noopener noreferrer" className="text-sky-600 font-medium hover:text-sky-800 underline underline-offset-2 transition-colors">Rantera</a>
         </p>
       </div>
     </section>

@@ -59,7 +59,7 @@ export default function Footer() {
           </p>
           <p className="text-sky-400 text-xs">
             Detection powered by{" "}
-            <span className="text-sky-600">Rantera</span>
+            <a href="https://rantera.ai" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:text-sky-800 underline underline-offset-2 transition-colors">Rantera</a>
           </p>
         </div>
       </div>
