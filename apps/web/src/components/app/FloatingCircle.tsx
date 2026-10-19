@@ -432,6 +432,20 @@ export default function FloatingCircle() {
       return;
     }
 
+    if (passwordFocus) {
+      const messages = [
+        "🙈 Not looking, I promise.",
+        "Eyes closed! Type away.",
+        "🙈 Can't see a thing.",
+        "Nope. Eyes shut.",
+        "I see nothing. Nothing!",
+      ];
+      setBubble({ verdict: "info", message: messages[Math.floor(Math.random() * messages.length)] });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 2500);
+      return;
+    }
+
     await runScan(false);
   }
 
