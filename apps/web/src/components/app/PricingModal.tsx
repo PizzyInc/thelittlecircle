@@ -16,7 +16,8 @@ const plans = [
     description: "For anyone who wants to start knowing",
     features: [
       "10 checks per day",
-      "Text, images, audio, video",
+      "Text and images",
+      "AI or Real detection",
       "1 device",
       "Tap-to-check",
     ],
@@ -27,14 +28,15 @@ const plans = [
   {
     name: "Pro",
     price: { monthly: 4.99, yearly: 39.99 },
-    description: "For people who want unlimited protection",
+    description: "For people who want the full picture",
     features: [
       "Unlimited checks",
+      "AI, Fake, or Real detection",
       "All content types",
       "All your devices",
+      "Custom circle skin",
       "Stealth mode",
-      "Always-On mode",
-      "Priority detection",
+      "Voice commands",
     ],
     cta: "Subscribe",
     planKey: "pro" as const,

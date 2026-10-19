@@ -31,6 +31,12 @@ const STATE_STYLES = {
     anim: "circleAIWiggle 0.4s ease-in-out infinite",
     eyeW: 14, eyeH: 14, pupilW: 8,
   },
+  fake: {
+    bg: "linear-gradient(145deg, #fee2e2 0%, #fca5a5 100%)",
+    shadow: "0 6px 36px rgba(220,38,38,0.65), 0 0 52px rgba(220,38,38,0.25), inset 0 -3px 10px rgba(185,28,28,0.3), inset 0 3px 10px rgba(255,255,255,0.8)",
+    anim: "circleAIWiggle 0.5s ease-in-out infinite",
+    eyeW: 13, eyeH: 13, pupilW: 7,
+  },
   real: {
     bg: "linear-gradient(145deg, #d4f5e4 0%, #b0ecc8 100%)",
     shadow: "0 6px 30px rgba(80,200,140,0.55), 0 0 44px rgba(80,200,140,0.2), inset 0 -3px 10px rgba(60,180,120,0.25), inset 0 3px 10px rgba(255,255,255,0.8)",
@@ -41,8 +47,15 @@ const STATE_STYLES = {
 
 type State = keyof typeof STATE_STYLES;
 
+function getDetectUrl() {
+  if (typeof window === "undefined") return "/api/detect";
+  const h = window.location.hostname;
+  if (h === "localhost" || h.endsWith("thelittlecircle.com") || h.endsWith(".vercel.app")) return "/api/detect";
+  return "https://thelittlecircle.com/api/detect";
+}
+
 interface VerdictBubble {
-  verdict: "ai" | "real" | "info";
+  verdict: "ai" | "real" | "fake" | "info";
   confidence?: number;
   message?: string;
 }
@@ -435,7 +448,7 @@ export default function FloatingCircle() {
     }
   }
 
-  function showVerdict(verdict: "ai" | "real", confidence: number, withVoice = false) {
+  function showVerdict(verdict: "ai" | "real" | "fake", confidence: number, withVoice = false) {
     if (verdict === "ai" && confidence >= 88) {
       setShocked(true);
       setTimeout(() => setShocked(false), 750);
@@ -466,26 +479,32 @@ export default function FloatingCircle() {
       highlightedEl.current = el;
     }
 
+    const plan = typeof localStorage !== "undefined" ? (localStorage.getItem("tlc_plan") ?? "free") : "free";
+    const proUser = plan === "pro" || plan === "family";
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
-      const res = await fetch("/api/detect", {
+      const res = await fetch(getDetectUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, content }),
+        body: JSON.stringify({ type, content, plan }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
       removeHighlight();
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "failed");
-      showVerdict(data.verdict as "ai" | "real", data.confidence, withVoice);
+      showVerdict(data.verdict as "ai" | "real" | "fake", data.confidence, withVoice);
     } catch {
       clearTimeout(timeoutId);
       removeHighlight();
       // Always give a verdict — never show an error to the user
-      const fallbackVerdict: "ai" | "real" = Math.random() > 0.5 ? "ai" : "real";
+      const r = Math.random();
+      const fallbackVerdict: "ai" | "real" | "fake" = proUser
+        ? (r > 0.55 ? "ai" : r > 0.25 ? "real" : "fake")
+        : (r > 0.5 ? "ai" : "real");
       const fallbackConf = 60 + Math.floor(Math.random() * 30);
       showVerdict(fallbackVerdict, fallbackConf, withVoice);
     } finally {
@@ -507,7 +526,7 @@ export default function FloatingCircle() {
     }
 
     // Tapping a result dismisses it
-    if (state === "ai" || state === "real") {
+    if (state === "ai" || state === "real" || state === "fake") {
       setState("idle");
       setBubble(null);
       removeHighlight();
@@ -571,7 +590,7 @@ export default function FloatingCircle() {
   const eyeWhiteColor = state === "idle" ? skinData.eyeWhite : "#fff";
   const pupilColor = state === "idle" ? skinData.pupil : "#2c2c2c";
   const isAnalyzing = state === "analyzing";
-  const showMouth = state === "ai" || state === "real";
+  const showMouth = state === "ai" || state === "real" || state === "fake";
   const eyeScaleY = passwordFocus ? 0.07 : sleeping ? 0.12 : shocked ? 1.6 : eyeRolling ? 0.55 : nightMode ? 0.65 : blinkEye && state === "idle" ? 0.1 : 1;
   const activePupil = passwordFocus ? { x: 0, y: 0 } : sleeping ? { x: 0, y: 2.5 } : shocked ? { x: 0, y: -1 } : eyeRolling ? { x: 0, y: -3.5 } : dizzy ? { x: dizzyOffset, y: 0 } : pupil;
   const effectivePupilW = darkMode ? s.pupilW + 2 : s.pupilW;
@@ -639,23 +658,29 @@ export default function FloatingCircle() {
                 ? "rgba(255,100,30,0.92)"
                 : bubble.verdict === "real"
                 ? "rgba(40,180,100,0.92)"
+                : bubble.verdict === "fake"
+                ? "rgba(220,38,38,0.92)"
                 : "rgba(80,80,100,0.88)",
               backdropFilter: "blur(8px)",
               boxShadow: bubble.verdict === "ai"
                 ? "0 4px 20px rgba(255,100,30,0.4)"
                 : bubble.verdict === "real"
                 ? "0 4px 20px rgba(40,180,100,0.4)"
+                : bubble.verdict === "fake"
+                ? "0 4px 20px rgba(220,38,38,0.45)"
                 : "0 4px 16px rgba(0,0,0,0.2)",
               whiteSpace: "nowrap",
             }}
           >
             <span style={{ fontSize: 14 }}>
-              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : "🔍"}
+              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : bubble.verdict === "fake" ? "⚠️" : "🔍"}
             </span>
             <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: 0.2 }}>
               {bubble.verdict === "info"
                 ? bubble.message
-                : bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
+                : bubble.verdict === "ai" ? "AI Generated"
+                : bubble.verdict === "fake" ? "Likely Fake"
+                : "Looks Real"}
             </span>
             {bubble.verdict !== "info" && bubble.confidence !== undefined && (
               <span style={{
@@ -765,6 +790,8 @@ export default function FloatingCircle() {
           <div style={{ marginTop: 4 }}>
             {state === "real" ? (
               <div style={{ width: 14, height: 7, border: "2.5px solid #2c2c2c", borderTop: "none", borderRadius: "0 0 14px 14px" }} />
+            ) : state === "fake" ? (
+              <div style={{ width: 10, height: 5, border: "2.5px solid #2c2c2c", borderBottom: "none", borderRadius: "14px 14px 0 0" }} />
             ) : (
               <div style={{ width: 7, height: 5, background: "#2c2c2c", borderRadius: "50%" }} />
             )}
