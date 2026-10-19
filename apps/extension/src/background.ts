@@ -41,3 +41,12 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
   injectIntoAllTabs();
 });
+
+// Inject into every page as it finishes loading — this is the primary injection path
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete" && isEligible(tab.url)) {
+    chrome.scripting
+      .executeScript({ target: { tabId }, files: ["src/content.js"] })
+      .catch(() => {});
+  }
+});

@@ -35,11 +35,17 @@ const STATE_STYLES = {
     anim: "circleRealBounce 0.6s ease-out",
     eyeW: 11, eyeH: 11, pupilW: 7,
   },
+  fake: {
+    bg: "linear-gradient(145deg, #fee2e2 0%, #fca5a5 100%)",
+    shadow: "0 6px 36px rgba(220,38,38,0.55), inset 0 3px 10px rgba(255,255,255,0.8)",
+    anim: "circleAIWiggle 0.5s ease-in-out infinite",
+    eyeW: 13, eyeH: 13, pupilW: 7,
+  },
 } as const;
 
 type State = keyof typeof STATE_STYLES;
 interface VerdictBubble {
-  verdict: "ai" | "real" | "info";
+  verdict: "ai" | "real" | "fake" | "info";
   confidence?: number;
   message?: string;
 }
@@ -115,6 +121,7 @@ export default function FloatingCircle() {
   const [isPro, setIsPro] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [plan, setPlan] = useState("free");
 
   const dragStart = useRef({ mx: 0, my: 0, bx: 0, by: 0 });
   const pointerDownTime = useRef(0);
@@ -123,6 +130,7 @@ export default function FloatingCircle() {
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const highlightedEl = useRef<Element | null>(null);
   const circleRef = useRef<HTMLDivElement>(null);
+  const scanningRef = useRef(false); // mutex — prevents duplicate scans
 
   // Load settings from chrome.storage
   useEffect(() => {
@@ -132,19 +140,24 @@ export default function FloatingCircle() {
       getStorage<string>("tlc_name", "Circle"),
       getStorage<string>("tlc_plan", "free"),
       getStorage<string | null>("tlc_token", null),
-    ]).then(([savedPos, savedActive, savedName, plan, token]) => {
+    ]).then(([savedPos, savedActive, savedName, savedPlan, token]) => {
       setPos(savedPos ?? { x: window.innerWidth - SIZE - 24, y: window.innerHeight - SIZE - 80 });
       setActive(savedActive);
       setCircleName(savedName);
-      setIsPro(plan === "pro" || plan === "family");
+      setPlan(savedPlan);
+      setIsPro(savedPlan === "pro" || savedPlan === "family");
       setAuthToken(token);
     });
 
-    // Listen for storage changes (from popup)
+    // Listen for storage changes (from popup or bridge)
     const onChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes.tlc_active) setActive(changes.tlc_active.newValue);
       if (changes.tlc_name) setCircleName(changes.tlc_name.newValue);
-      if (changes.tlc_plan) setIsPro(["pro", "family"].includes(changes.tlc_plan.newValue));
+      if (changes.tlc_plan) {
+        const p = changes.tlc_plan.newValue as string;
+        setPlan(p);
+        setIsPro(p === "pro" || p === "family");
+      }
       if (changes.tlc_token) setAuthToken(changes.tlc_token.newValue);
     };
     chrome.storage.onChanged.addListener(onChange);
@@ -230,11 +243,14 @@ export default function FloatingCircle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, isPro, circleName]);
 
-  function speak(verdict: "ai" | "real", confidence: number) {
+  function speak(verdict: "ai" | "real" | "fake", confidence: number) {
     if (!("speechSynthesis" in window)) return;
-    const variants = verdict === "ai"
-      ? [`Looks AI-generated — ${confidence}% sure.`, `I'm detecting AI here. About ${confidence}% confident.`]
-      : [`This looks real. ${confidence}% confident.`, `Seems genuine to me — around ${confidence}%.`];
+    const variants =
+      verdict === "ai"
+        ? [`Looks AI-generated — ${confidence}% sure.`, `I'm detecting AI here. About ${confidence}% confident.`]
+        : verdict === "fake"
+        ? [`This looks fake — ${confidence}% sure.`, `Careful, this seems designed to mislead. About ${confidence}% confident.`]
+        : [`This looks real. ${confidence}% confident.`, `Seems genuine to me — around ${confidence}%.`];
     const u = new SpeechSynthesisUtterance(variants[Math.floor(Math.random() * variants.length)]);
     u.rate = 0.97; u.pitch = 1.1;
     window.speechSynthesis.cancel();
@@ -250,7 +266,9 @@ export default function FloatingCircle() {
   }
 
   async function handleDetect(fromVoice = false) {
-    if (state === "analyzing" || !pos) return;
+    if (scanningRef.current || !pos) return;
+    scanningRef.current = true;
+
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
 
@@ -260,6 +278,7 @@ export default function FloatingCircle() {
 
     if (type === "text" && content.length < 250) {
       setState("idle");
+      scanningRef.current = false;
       setBubble({ verdict: "info", message: "Not enough text to scan" });
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 3000);
@@ -282,7 +301,7 @@ export default function FloatingCircle() {
       const res = await fetch(API_URL, {
         method: "POST",
         headers,
-        body: JSON.stringify({ type, content }),
+        body: JSON.stringify({ type, content, plan }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -290,19 +309,20 @@ export default function FloatingCircle() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "failed");
 
-      const verdict = data.verdict as "ai" | "real";
+      const verdict = data.verdict as "ai" | "real" | "fake";
       setState(verdict);
       setBubble({ verdict, confidence: data.confidence });
       if (fromVoice) speak(verdict, data.confidence);
 
       if (stateTimer.current) clearTimeout(stateTimer.current);
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
-      stateTimer.current = setTimeout(() => setState("idle"), 8000);
+      stateTimer.current = setTimeout(() => { setState("idle"); scanningRef.current = false; }, 8000);
       bubbleTimer.current = setTimeout(() => setBubble(null), 5000);
     } catch (err) {
       clearTimeout(timeoutId);
       removeHighlight();
       setState("idle");
+      scanningRef.current = false;
       if (!(err instanceof Error && err.name === "AbortError")) console.warn("[TLC] detection error:", err);
     }
   }
@@ -336,8 +356,11 @@ export default function FloatingCircle() {
     const elapsed = Date.now() - pointerDownTime.current;
     e.stopPropagation();
     if (!hasMoved.current && elapsed < TAP_MAX_MS) {
-      if (state === "ai" || state === "real") {
-        setState("idle"); setBubble(null); removeHighlight();
+      if (state === "ai" || state === "real" || state === "fake") {
+        setState("idle");
+        scanningRef.current = false;
+        setBubble(null);
+        removeHighlight();
       } else {
         handleDetect(false);
       }
@@ -348,7 +371,7 @@ export default function FloatingCircle() {
 
   const s = STATE_STYLES[state];
   const isAnalyzing = state === "analyzing";
-  const showMouth = state === "ai" || state === "real";
+  const showMouth = state === "ai" || state === "real" || state === "fake";
   const eyeScaleY = blinkEye && state === "idle" ? 0.1 : 1;
   const bubbleAbove = pos.y > window.innerHeight * 0.45;
   const bubbleAlignRight = pos.x + SIZE / 2 > window.innerWidth * 0.5;
@@ -391,22 +414,30 @@ export default function FloatingCircle() {
               ? "rgba(255,100,30,0.92)"
               : bubble.verdict === "real"
               ? "rgba(40,180,100,0.92)"
+              : bubble.verdict === "fake"
+              ? "rgba(220,38,38,0.92)"
               : "rgba(80,80,100,0.88)",
             backdropFilter: "blur(8px)",
             boxShadow: bubble.verdict === "ai"
               ? "0 4px 20px rgba(255,100,30,0.4)"
               : bubble.verdict === "real"
               ? "0 4px 20px rgba(40,180,100,0.4)"
+              : bubble.verdict === "fake"
+              ? "0 4px 20px rgba(220,38,38,0.4)"
               : "0 4px 16px rgba(0,0,0,0.2)",
             whiteSpace: "nowrap",
           }}>
             <span style={{ fontSize: 14 }}>
-              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : "🔍"}
+              {bubble.verdict === "ai" ? "🤖" : bubble.verdict === "real" ? "✅" : bubble.verdict === "fake" ? "⚠️" : "🔍"}
             </span>
             <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>
               {bubble.verdict === "info"
                 ? bubble.message
-                : bubble.verdict === "ai" ? "AI Generated" : "Looks Real"}
+                : bubble.verdict === "ai"
+                ? "AI Generated"
+                : bubble.verdict === "fake"
+                ? "Likely Fake"
+                : "Looks Real"}
             </span>
             {bubble.verdict !== "info" && bubble.confidence !== undefined && (
               <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, background: "rgba(0,0,0,0.15)", borderRadius: 10, padding: "1px 6px" }}>
@@ -456,6 +487,8 @@ export default function FloatingCircle() {
           <div style={{ marginTop: 4 }}>
             {state === "real"
               ? <div style={{ width: 14, height: 7, border: "2.5px solid #2c2c2c", borderTop: "none", borderRadius: "0 0 14px 14px" }} />
+              : state === "fake"
+              ? <div style={{ width: 10, height: 5, border: "2.5px solid #2c2c2c", borderBottom: "none", borderRadius: "14px 14px 0 0" }} />
               : <div style={{ width: 7, height: 5, background: "#2c2c2c", borderRadius: "50%" }} />
             }
           </div>
