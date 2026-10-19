@@ -7,22 +7,53 @@ type Plan = "free" | "pro" | "family";
 
 const PRO_FEATURES = [
   "Unlimited checks",
+  "AI, Fake, or Real detection",
+  "Custom circle skin",
   "Stealth mode",
-  "Always-On mode",
+  "Voice commands",
   "All devices",
 ];
 
 export default function SubscriptionSection() {
   const [plan, setPlan] = useState<Plan>("free");
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("tlc_plan") ?? "free";
-    if (stored === "pro" || stored === "family") setPlan(stored as Plan);
+    // Sync plan from Supabase (source of truth after payment)
+    fetch("/api/plan")
+      .then((r) => r.json())
+      .then(({ plan: p }) => {
+        if (p === "pro" || p === "family") {
+          setPlan(p);
+          localStorage.setItem("tlc_plan", p);
+        } else {
+          // Fall back to localStorage if Supabase has no record yet
+          const stored = localStorage.getItem("tlc_plan") ?? "free";
+          if (stored === "pro" || stored === "family") setPlan(stored as Plan);
+        }
+      })
+      .catch(() => {
+        const stored = localStorage.getItem("tlc_plan") ?? "free";
+        if (stored === "pro" || stored === "family") setPlan(stored as Plan);
+      });
   }, []);
 
   const isPro = plan !== "free";
   const label = plan === "family" ? "Family" : plan === "pro" ? "Pro" : "Free";
+
+  async function openPortal() {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/lemonsqueezy/portal");
+      const { url } = await res.json();
+      if (url) {
+        window.open(url, "_blank");
+      }
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-sky-200 p-6">
@@ -41,13 +72,19 @@ export default function SubscriptionSection() {
       </div>
 
       {isPro ? (
-        <p className="text-xs text-sky-500">
-          You&apos;re on the{" "}
-          <span className="font-semibold text-sky-700">{label}</span> plan.{" "}
-          <button onClick={() => setShowPricingModal(true)} className="underline hover:text-sky-700 transition-colors">
-            Manage
+        <div className="space-y-2">
+          <p className="text-xs text-sky-500">
+            You&apos;re on the{" "}
+            <span className="font-semibold text-sky-700">{label}</span> plan.
+          </p>
+          <button
+            onClick={openPortal}
+            disabled={portalLoading}
+            className="text-xs font-semibold text-sky-600 hover:text-sky-800 transition-colors disabled:opacity-50"
+          >
+            {portalLoading ? "Opening…" : "Manage subscription →"}
           </button>
-        </p>
+        </div>
       ) : (
         <div className="border border-dashed border-sky-200 rounded-xl p-4">
           <p className="text-xs font-medium text-sky-800 mb-2">Unlock with Pro</p>
