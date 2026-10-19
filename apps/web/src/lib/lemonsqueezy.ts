@@ -1,7 +1,9 @@
 import { lemonSqueezySetup } from "@lemonsqueezy/lemonsqueezy.js";
 
 export function setupLS() {
-  lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY! });
+  // Trim to guard against accidental newlines or extra content in the env var
+  const apiKey = process.env.LEMONSQUEEZY_API_KEY?.split("\n")[0].trim() ?? "";
+  lemonSqueezySetup({ apiKey });
 }
 
 export const STORE_ID = "501579";
