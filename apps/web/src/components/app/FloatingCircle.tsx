@@ -416,7 +416,7 @@ export default function FloatingCircle() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [circleActive, voiceEnabled, isPro, circleName]);
 
-  function speak(verdict: "ai" | "real", confidence: number) {
+  function speak(verdict: "ai" | "real" | "fake", confidence: number) {
     if (!("speechSynthesis" in window)) return;
     const name = circleName;
     const lines =
@@ -425,6 +425,12 @@ export default function FloatingCircle() {
             `Looks AI-generated to me. ${confidence}% sure.`,
             `I'm detecting AI here, about ${confidence}% confident.`,
             `That's AI. ${name} is ${confidence}% certain.`,
+          ]
+        : verdict === "fake"
+        ? [
+            `This looks fake to me. ${confidence}% sure.`,
+            `I'm detecting misinformation here, about ${confidence}% confident.`,
+            `That seems fabricated. ${confidence}% certain.`,
           ]
         : [
             `This looks real. ${confidence}% confident.`,
