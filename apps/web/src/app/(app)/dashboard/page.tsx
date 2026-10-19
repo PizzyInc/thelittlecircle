@@ -316,7 +316,7 @@ export default function DashboardPage() {
 
         {/* Header: title + view toggle + date filter */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <h2 className="text-sm font-semibold text-sky-900 flex-1 min-w-0">Recent detections</h2>
+          <h2 className="text-sm font-semibold text-sky-900 w-full sm:flex-1 sm:w-auto">Recent detections</h2>
 
           {/* View toggle */}
           <div className="flex rounded-lg border border-sky-200 overflow-hidden text-xs font-medium">

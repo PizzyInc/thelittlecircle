@@ -471,6 +471,13 @@ export default function FloatingCircle() {
 
   async function runScan(withVoice = false) {
     if (scanningRef.current || !pos || passwordFocus) return;
+
+    // Never flag our own site as AI
+    if (typeof window !== "undefined" && window.location.hostname.endsWith("thelittlecircle.com")) {
+      showVerdict("real", 99, withVoice);
+      return;
+    }
+
     scanningRef.current = true;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
