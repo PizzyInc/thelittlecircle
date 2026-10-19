@@ -98,7 +98,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (searchParams.get("upgraded") === "1") {
       setUpgraded(true);
-      // Sync plan from Supabase and write to localStorage
       fetch("/api/plan")
         .then((r) => r.json())
         .then(({ plan }) => {
@@ -107,8 +106,21 @@ export default function DashboardPage() {
           }
         })
         .catch(() => {});
-      // Remove the query param without re-rendering the whole page
       router.replace("/dashboard", { scroll: false });
+    }
+
+    // After signup from landing page with a plan selected — trigger checkout
+    const checkoutVariant = searchParams.get("checkout");
+    if (checkoutVariant) {
+      router.replace("/dashboard", { scroll: false });
+      fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variant: checkoutVariant }),
+      })
+        .then((r) => r.json())
+        .then(({ url }) => { if (url) window.location.href = url; })
+        .catch(() => {});
     }
   }, [searchParams, router]);
 

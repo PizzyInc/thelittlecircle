@@ -20,7 +20,6 @@ export default function SubscriptionSection() {
   const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    // Sync plan from Supabase (source of truth after payment)
     fetch("/api/plan")
       .then((r) => r.json())
       .then(({ plan: p }) => {
@@ -28,12 +27,12 @@ export default function SubscriptionSection() {
           setPlan(p);
           localStorage.setItem("tlc_plan", p);
         } else {
-          // Fall back to localStorage if Supabase has no record yet
-          const stored = localStorage.getItem("tlc_plan") ?? "free";
-          if (stored === "pro" || stored === "family") setPlan(stored as Plan);
+          localStorage.removeItem("tlc_plan");
+          setPlan("free");
         }
       })
       .catch(() => {
+        // Network error only — keep cached value
         const stored = localStorage.getItem("tlc_plan") ?? "free";
         if (stored === "pro" || stored === "family") setPlan(stored as Plan);
       });

@@ -60,6 +60,7 @@ const plans = [
 export default function PricingModal({ open, onClose }: PricingModalProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState<"pro" | "family" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -69,21 +70,28 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
       return;
     }
     setLoading(planKey);
+    setError(null);
     try {
       const variant = `${planKey}_${billing}` as const;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       const res = await fetch("/api/lemonsqueezy/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variant }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error(data.error ?? "Failed");
+        throw new Error(data.error ?? "Failed to create checkout");
       }
-    } catch {
+    } catch (err) {
       setLoading(null);
+      const msg = err instanceof Error ? err.message : "";
+      setError(msg.includes("abort") ? "Request timed out. Please try again." : (msg || "Something went wrong. Please try again."));
     }
   }
 
@@ -144,6 +152,12 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
               <span className="text-sky-500 text-xs ml-1">Save 33%</span>
             </button>
           </div>
+
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 text-center">
+              {error}
+            </div>
+          )}
 
           {/* Plans grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

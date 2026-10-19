@@ -69,13 +69,22 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
       onPlanSelect(plan.planKey);
       return;
     }
+    // Not logged in — send to signup with plan intent, then checkout after auth
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const variant = `${plan.planKey}_${billing}`;
       const res = await fetch("/api/lemonsqueezy/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variant }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
+      if (res.status === 401) {
+        window.location.href = `/login?plan=${variant}`;
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -84,6 +93,7 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
         setTimeout(() => setToast(null), 3000);
       }
     } catch {
+      clearTimeout(timeout);
       setToast("Could not start checkout. Please try again.");
       setTimeout(() => setToast(null), 3000);
     }

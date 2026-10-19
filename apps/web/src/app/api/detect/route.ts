@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 type Verdict = "ai" | "real" | "fake";
@@ -207,9 +208,10 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   let { data: { user } } = await supabase.auth.getUser();
+  let bearer: string | undefined;
 
   if (!user) {
-    const bearer = request.headers.get("Authorization")?.replace("Bearer ", "");
+    bearer = request.headers.get("Authorization")?.replace("Bearer ", "") ?? undefined;
     if (bearer) {
       const { data } = await supabase.auth.getUser(bearer);
       user = data.user;
@@ -217,18 +219,31 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { type, content, filename, plan } = body as {
+  const { type, content, filename } = body as {
     type: "text" | "image" | "audio" | "video";
     content: string;
     filename?: string;
-    plan?: string;
   };
 
   if (!type || !content) {
     return NextResponse.json({ error: "Missing type or content" }, { status: 400 });
   }
 
-  const isPro = plan === "pro" || plan === "family";
+  let isPro = false;
+  if (user) {
+    const svcKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (svcKey) {
+      const admin = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, svcKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { data: profile } = await admin
+        .from("user_profiles")
+        .select("plan")
+        .eq("user_id", user.id)
+        .single();
+      isPro = profile?.plan === "pro" || profile?.plan === "family";
+    }
+  }
 
   try {
     const result = await detect(type, content, isPro);

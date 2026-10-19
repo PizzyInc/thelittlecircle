@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CircleLogo from "@/components/CircleLogo";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pendingPlan = searchParams.get("plan");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +31,7 @@ export default function LoginPage() {
       }
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      router.push(pendingPlan ? `/dashboard?checkout=${pendingPlan}` : "/dashboard");
     }
   }
 

@@ -18,9 +18,23 @@ export default function CircleSection() {
     setName(localStorage.getItem("tlc_circle_name") || "Circle");
     setStealth(localStorage.getItem("tlc_stealth") === "true");
     setVoice(localStorage.getItem("tlc_voice_enabled") === "true");
-    const plan = localStorage.getItem("tlc_plan") ?? "free";
-    setIsPro(plan === "pro" || plan === "family");
     setSkin((localStorage.getItem("tlc_circle_skin") as SkinId) || "peach");
+
+    fetch("/api/plan")
+      .then((r) => r.json())
+      .then(({ plan: p }) => {
+        if (p === "pro" || p === "family") {
+          localStorage.setItem("tlc_plan", p);
+          setIsPro(true);
+        } else {
+          localStorage.removeItem("tlc_plan");
+          setIsPro(false);
+        }
+      })
+      .catch(() => {
+        const stored = localStorage.getItem("tlc_plan") ?? "free";
+        setIsPro(stored === "pro" || stored === "family");
+      });
   }, []);
 
   function saveName() {
