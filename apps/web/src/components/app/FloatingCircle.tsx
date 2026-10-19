@@ -273,7 +273,7 @@ export default function FloatingCircle() {
   useEffect(() => {
     const SENSITIVE = /password|passwd|pwd|cvv|ssn|secret|pin|credit.?card|card.?num/i;
 
-    function isSensitive(el: EventTarget | null): boolean {
+    function isSensitive(el: Element | EventTarget | null): boolean {
       if (!el || (el as HTMLElement).tagName !== "INPUT") return false;
       const input = el as HTMLInputElement;
       if (input.type === "password") return true;
@@ -286,9 +286,18 @@ export default function FloatingCircle() {
 
     document.addEventListener("focusin", onFocusIn);
     document.addEventListener("focusout", onFocusOut);
+
+    // Polling fallback — catches cases where focusin doesn't fire (certain SPAs, extension contexts)
+    let lastSensitive = false;
+    const pollId = setInterval(() => {
+      const now = isSensitive(document.activeElement);
+      if (now !== lastSensitive) { lastSensitive = now; setPasswordFocus(now); }
+    }, 400);
+
     return () => {
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
+      clearInterval(pollId);
     };
   }, []);
 
@@ -370,25 +379,24 @@ export default function FloatingCircle() {
       recognition.lang = "en-US";
 
       recognition.onresult = (e: any) => {
-        const transcript = Array.from(e.results as SpeechRecognitionResultList)
-          .map((r) => r[0].transcript)
-          .join(" ")
-          .toLowerCase();
+        const results = Array.from(e.results as SpeechRecognitionResultList) as any[];
+        // Build transcript from final results + latest interim only (avoids stale accumulation)
+        const finalText = results.filter((r) => r.isFinal).map((r) => r[0].transcript).join(" ");
+        const lastResult = results[results.length - 1];
+        const interimText = lastResult && !lastResult.isFinal ? lastResult[0].transcript : "";
+        const transcript = `${finalText} ${interimText}`.toLowerCase().trim();
 
         if (!wakeDetected && transcript.includes(circleName.toLowerCase())) {
           wakeDetected = true;
           setVoiceReady(true);
-          // Capture everything after the name as the query
           accumulatedText = transcript.split(circleName.toLowerCase()).slice(1).join(" ").trim();
         } else if (wakeDetected) {
           accumulatedText = transcript;
         }
 
-        // Reset silence timer each time speech comes in
         if (wakeDetected) {
           clearTimeout(silenceTimer);
           silenceTimer = setTimeout(() => {
-            // Silence after wake → process
             try { recognition.stop(); } catch { /* ignore */ }
           }, 2200);
         }
@@ -401,7 +409,11 @@ export default function FloatingCircle() {
         restart();
       };
 
-      recognition.onerror = () => restart();
+      recognition.onerror = (e: any) => {
+        // Mic denied or service unavailable — stop looping, voice won't work
+        if (e.error === "not-allowed" || e.error === "service-not-available") return;
+        restart();
+      };
 
       try { recognition.start(); } catch { restart(); }
     }
