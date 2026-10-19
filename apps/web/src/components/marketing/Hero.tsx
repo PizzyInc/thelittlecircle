@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, CSSProperties } from "react";
 import { X } from "lucide-react";
 
-type CircleState = "idle" | "scanning" | "ai" | "real";
+type CircleState = "idle" | "scanning" | "ai" | "real" | "fake";
 
 const stateCfg: Record<
   CircleState,
@@ -79,6 +79,20 @@ const stateCfg: Record<
     ringColor: "rgba(144,224,176,0.8)",
     ringDuration: "1.5s",
   },
+  fake: {
+    label: "That's misleading",
+    sub: "Human-made, but built to deceive.",
+    labelColor: "#dc2626",
+    bg: "linear-gradient(145deg, #fee2e2 0%, #fca5a5 100%)",
+    shadow:
+      "0 8px 40px rgba(220,38,38,0.55), 0 0 70px rgba(220,38,38,0.25), inset 0 -4px 12px rgba(185,28,28,0.3), inset 0 4px 12px rgba(255,255,255,0.8)",
+    faceAnim: "circleAIWiggle 0.5s ease-in-out infinite",
+    eyeSize: 28,
+    pupilSize: 15,
+    showWorried: true,
+    ringColor: "rgba(252,165,165,0.8)",
+    ringDuration: "0.9s",
+  },
 };
 
 const CYCLE: Array<[CircleState, number]> = [
@@ -88,6 +102,9 @@ const CYCLE: Array<[CircleState, number]> = [
   ["idle", 2200],
   ["scanning", 2000],
   ["ai", 2800],
+  ["idle", 2000],
+  ["scanning", 2000],
+  ["fake", 2800],
 ];
 
 export default function Hero() {
@@ -244,8 +261,8 @@ export default function Hero() {
         </h1>
 
         <p className="text-base sm:text-lg md:text-xl text-sky-600 text-center max-w-sm sm:max-w-xl mb-3 leading-relaxed">
-          A little floating circle on every device and website you visit. Name
-          it, talk to it, and know the truth in seconds.
+          A little floating circle on every device and website you visit. Tap it,
+          talk to it — it tells you if something is AI, fake, or real. In seconds.
         </p>
         <p className="text-sky-500 font-medium text-center mb-10 text-sm sm:text-base">
           Tap or say its name. Know the truth.

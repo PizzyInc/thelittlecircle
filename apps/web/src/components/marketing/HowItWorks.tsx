@@ -17,7 +17,7 @@ const steps = [
   {
     number: "04",
     title: "Know the truth instantly",
-    description: "AI or Real, with a confidence score. It tells you visually and speaks the result back to you. Under 2 seconds.",
+    description: "AI, Fake, or Real — with a confidence score. It tells you visually and speaks the result back to you. Under 2 seconds.",
   },
 ];
 
@@ -154,8 +154,8 @@ export default function HowItWorks() {
         <div className="relative rounded-2xl border border-sky-200 bg-white/60 overflow-hidden p-8 md:p-16 flex items-center justify-center">
           <div className="absolute inset-0 bg-grid opacity-40" />
           <div className="relative flex flex-col items-center gap-8">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:gap-12 w-full">
-              <div className="bg-white rounded-2xl shadow-lg shadow-sky-100 px-6 py-5 flex flex-col gap-3 min-w-[220px]">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:gap-8 w-full flex-wrap justify-center">
+              <div className="bg-white rounded-2xl shadow-lg shadow-sky-100 px-6 py-5 flex flex-col gap-3 min-w-[200px]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">!</span>
                   <span className="font-semibold text-gray-900 text-sm">AI Generated</span>
@@ -168,6 +168,20 @@ export default function HowItWorks() {
                 </button>
               </div>
 
+              <div className="bg-white rounded-2xl shadow-lg shadow-red-50 px-6 py-5 flex flex-col gap-3 min-w-[200px]">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">⚠</span>
+                  <span className="font-semibold text-gray-900 text-sm">Likely Fake</span>
+                  <span className="ml-auto text-xs text-gray-400 font-medium">88%</span>
+                </div>
+                <div className="h-px bg-gray-100" />
+                <p className="text-xs text-gray-400 leading-relaxed">Text · High confidence</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] bg-red-50 text-red-400 border border-red-100 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                  <button className="text-xs text-sky-500 font-medium text-left hover:text-sky-700 transition-colors">Dismiss</button>
+                </div>
+              </div>
+
               <div className="bg-white rounded-2xl shadow-lg shadow-sky-100 px-6 py-5 flex flex-col gap-3 min-w-[200px]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-green-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">&#10003;</span>
@@ -175,7 +189,7 @@ export default function HowItWorks() {
                   <span className="ml-auto text-xs text-gray-400 font-medium">94%</span>
                 </div>
                 <div className="h-px bg-gray-100" />
-                <p className="text-xs text-gray-400 leading-relaxed">Text · High confidence</p>
+                <p className="text-xs text-gray-400 leading-relaxed">Image · High confidence</p>
                 <button className="text-xs text-sky-500 font-medium text-left hover:text-sky-700 transition-colors">
                   Dismiss
                 </button>
