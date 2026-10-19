@@ -12,13 +12,51 @@ function mock(pro = false): { verdict: Verdict; confidence: number; provider: st
   return { verdict, confidence: 62 + Math.floor(Math.random() * 33), provider: "mock" };
 }
 
-// Claude handles both text and image detection when ANTHROPIC_API_KEY is set.
-// Falls back to mock when no key is present.
+// Hive AI detection — handles both images (pass base64 data URL) and text (pass plain string)
+// Returns ai probability 0-1, or null if unavailable / failed
+async function hiveDetect(
+  type: "image" | "text",
+  content: string,
+): Promise<{ aiScore: number } | null> {
+  const apiKey = process.env.HIVE_AI_API_KEY;
+  if (!apiKey) return null;
 
-async function detectWithClaude(
+  try {
+    const body = type === "image"
+      ? { image: { url: content } }
+      : { text_data: content.slice(0, 3000) };
+
+    const res = await fetch("https://api.thehive.ai/api/v2/task/sync", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${apiKey}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(12000),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const classes = data?.status?.[0]?.response?.output?.[0]?.classes as
+      | Array<{ class: string; score: number }>
+      | undefined;
+    if (!classes) return null;
+
+    const aiScore = classes.find((c) => c.class === "ai_generated")?.score ?? 0;
+    return { aiScore };
+  } catch {
+    return null;
+  }
+}
+
+// Claude — used for fake-vs-real classification (Pro) and as full fallback
+async function claudeDetect(
   type: "text" | "image" | "audio" | "video",
   content: string,
-  pro = false
+  pro = false,
 ): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return mock(pro);
@@ -65,7 +103,6 @@ ${content.slice(0, 3000)}`;
     }
 
     if (type === "image") {
-      // Strip data URL prefix, detect media type
       const [header, b64] = content.includes(",") ? content.split(",") : ["", content];
       const mimeMatch = header.match(/data:(image\/\w+);/);
       const mediaType = (mimeMatch?.[1] ?? "image/jpeg") as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
@@ -77,10 +114,7 @@ ${content.slice(0, 3000)}`;
           {
             role: "user",
             content: [
-              {
-                type: "image",
-                source: { type: "base64", media_type: mediaType, data: b64 },
-              },
+              { type: "image", source: { type: "base64", media_type: mediaType, data: b64 } },
               {
                 type: "text",
                 text: pro
@@ -89,11 +123,11 @@ ${content.slice(0, 3000)}`;
 - "fake": human-made but digitally manipulated, staged, or misleading
 - "real": authentic, unaltered photograph or genuine human-made image
 
-Reply with ONLY valid JSON on a single line, no other text:
+Reply with ONLY valid JSON on a single line:
 {"verdict":"ai","confidence":85}`
                   : `Is this image AI-generated or a real photograph/human-made image?
 
-Reply with ONLY valid JSON on a single line, no other text:
+Reply with ONLY valid JSON on a single line:
 {"verdict":"ai","confidence":85}
 or
 {"verdict":"real","confidence":72}`,
@@ -109,12 +143,54 @@ or
       return { verdict, confidence: Number(parsed.confidence), provider: "claude" };
     }
 
-    // Audio / video: Claude can't process these directly yet
     return mock(pro);
   } catch (err) {
     console.warn("Claude detection error:", err);
     return mock(pro);
   }
+}
+
+// Main detection logic:
+// - Hive handles AI vs real (accurate, fast, purpose-built)
+// - If Hive says "real" AND user is Pro, Claude does a fake check
+// - Falls back to full Claude pipeline if Hive is unavailable
+async function detect(
+  type: "text" | "image" | "audio" | "video",
+  content: string,
+  pro = false,
+): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
+  if (type === "audio" || type === "video") return mock(pro);
+
+  const hiveType = type === "image" ? "image" : "text";
+  const hive = await hiveDetect(hiveType, content);
+
+  if (!hive) {
+    // No Hive — fall back to Claude for everything
+    return claudeDetect(type, content, pro);
+  }
+
+  // Hive returned a result
+  if (hive.aiScore > 0.5) {
+    const confidence = Math.round(hive.aiScore * 100);
+    return { verdict: "ai", confidence, provider: "hive" };
+  }
+
+  // Hive says not AI
+  if (!pro) {
+    const confidence = Math.round((1 - hive.aiScore) * 100);
+    return { verdict: "real", confidence, provider: "hive" };
+  }
+
+  // Pro user + Hive says not AI → run Claude to distinguish fake vs real
+  const claude = await claudeDetect(type, content, true);
+  // Trust Claude's verdict but use Hive confidence if Claude also says "real"
+  return {
+    verdict: claude.verdict,
+    confidence: claude.verdict === "real"
+      ? Math.max(claude.confidence, Math.round((1 - hive.aiScore) * 100))
+      : claude.confidence,
+    provider: `hive+${claude.provider}`,
+  };
 }
 
 // CORS headers for Chrome extension support
@@ -155,7 +231,7 @@ export async function POST(request: NextRequest) {
   const isPro = plan === "pro" || plan === "family";
 
   try {
-    const result = await detectWithClaude(type, content, isPro);
+    const result = await detect(type, content, isPro);
 
     const inputPreview = type === "text" ? content.slice(0, 200) : (filename ?? type);
     if (user) {
