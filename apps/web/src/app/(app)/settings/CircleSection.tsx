@@ -247,11 +247,6 @@ export default function CircleSection() {
     <PricingModal
       open={showPricingModal}
       onClose={() => setShowPricingModal(false)}
-      onSubscribe={(plan) => {
-        localStorage.setItem("tlc_plan", plan);
-        setIsPro(true);
-        setShowPricingModal(false);
-      }}
     />
     </>
   );

@@ -108,11 +108,6 @@ export default function SubscriptionSection() {
       <PricingModal
         open={showPricingModal}
         onClose={() => setShowPricingModal(false)}
-        onSubscribe={(p) => {
-          localStorage.setItem("tlc_plan", p);
-          setPlan(p);
-          setShowPricingModal(false);
-        }}
       />
     </div>
   );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { FileText, Image as ImageIcon, Mic, Video } from "lucide-react";
+import { FileText, Image as ImageIcon, Mic, Video, X } from "lucide-react";
 import CircleToggleCard from "@/components/app/CircleToggleCard";
 
 const PAGE_SIZE = 10;
@@ -71,7 +72,10 @@ function getLast7Days(): { date: string; day: string }[] {
 
 export default function DashboardPage() {
   const supabase = useMemo(() => createClient(), []);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
+  const [upgraded, setUpgraded] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(todayLocalYMD());
   const [view, setView] = useState<"list" | "chart">("list");
@@ -89,6 +93,24 @@ export default function DashboardPage() {
   // Chart
   const [chartData, setChartData] = useState<DayData[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
+
+  // Show upgrade banner and sync plan from Supabase
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "1") {
+      setUpgraded(true);
+      // Sync plan from Supabase and write to localStorage
+      fetch("/api/plan")
+        .then((r) => r.json())
+        .then(({ plan }) => {
+          if (plan === "pro" || plan === "family") {
+            localStorage.setItem("tlc_plan", plan);
+          }
+        })
+        .catch(() => {});
+      // Remove the query param without re-rendering the whole page
+      router.replace("/dashboard", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   // Resolve current user on mount
   useEffect(() => {
@@ -238,6 +260,25 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {upgraded && (
+        <div className="flex items-start gap-3 mb-6 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+          <span className="text-xl">🎉</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-emerald-800">Welcome to Pro!</p>
+            <p className="text-xs text-emerald-600 mt-0.5">
+              Your circle can now detect AI, Fake, and Real content. Tap it on any page to try.
+            </p>
+          </div>
+          <button
+            onClick={() => setUpgraded(false)}
+            className="flex-shrink-0 text-emerald-400 hover:text-emerald-600 transition-colors"
+            aria-label="Dismiss"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-sky-950">Dashboard</h1>
         <p className="text-sky-500 text-sm mt-1">

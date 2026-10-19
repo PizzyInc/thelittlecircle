@@ -6,7 +6,6 @@ import { Check, X } from "lucide-react";
 interface PricingModalProps {
   open: boolean;
   onClose: () => void;
-  onSubscribe?: (plan: "pro" | "family") => void;
 }
 
 const plans = [
@@ -58,7 +57,7 @@ const plans = [
   },
 ];
 
-export default function PricingModal({ open, onClose, onSubscribe }: PricingModalProps) {
+export default function PricingModal({ open, onClose }: PricingModalProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState<"pro" | "family" | null>(null);
 
@@ -67,10 +66,6 @@ export default function PricingModal({ open, onClose, onSubscribe }: PricingModa
   async function handleCta(planKey: "free" | "pro" | "family") {
     if (planKey === "free") {
       onClose();
-      return;
-    }
-    if (onSubscribe) {
-      onSubscribe(planKey);
       return;
     }
     setLoading(planKey);
