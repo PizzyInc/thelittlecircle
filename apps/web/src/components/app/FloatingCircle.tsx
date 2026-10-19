@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SKINS, type SkinId } from "@/lib/circleSkins";
 
 const SIZE = 56;
 const MARGIN = 16;
@@ -133,8 +134,10 @@ export default function FloatingCircle() {
   const [dizzy, setDizzy] = useState(false);
   const [dizzyOffset, setDizzyOffset] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
+  const [skin, setSkin] = useState<SkinId>("peach");
 
   const dragStart = useRef({ mx: 0, my: 0, bx: 0, by: 0 });
+  const scanningRef = useRef(false);
   const pointerDownTime = useRef(0);
   const hasMoved = useRef(false);
   const stateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -169,6 +172,7 @@ export default function FloatingCircle() {
     const plan = localStorage.getItem("tlc_plan") ?? "free";
     setIsPro(plan === "pro" || plan === "family");
     setVoiceEnabled(localStorage.getItem("tlc_voice_enabled") === "true");
+    setSkin((localStorage.getItem("tlc_circle_skin") as SkinId) || "peach");
 
     function onStorage(e: StorageEvent) {
       if (e.key === "tlc_stealth") setStealthMode(e.newValue === "true");
@@ -186,17 +190,22 @@ export default function FloatingCircle() {
     function onVoiceChange(e: Event) {
       setVoiceEnabled((e as CustomEvent<boolean>).detail);
     }
+    function onSkinChange(e: Event) {
+      setSkin((e as CustomEvent<SkinId>).detail);
+    }
     window.addEventListener("storage", onStorage);
     window.addEventListener("tlcStealthChange", onStealth);
     window.addEventListener("tlcCircleActiveChange", onCircleActive);
     window.addEventListener("tlcCircleNameChange", onNameChange);
     window.addEventListener("tlcVoiceChange", onVoiceChange);
+    window.addEventListener("tlcSkinChange", onSkinChange);
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("tlcStealthChange", onStealth);
       window.removeEventListener("tlcCircleActiveChange", onCircleActive);
       window.removeEventListener("tlcCircleNameChange", onNameChange);
       window.removeEventListener("tlcVoiceChange", onVoiceChange);
+      window.removeEventListener("tlcSkinChange", onSkinChange);
     };
   }, []);
 
@@ -442,7 +451,8 @@ export default function FloatingCircle() {
   }
 
   async function runScan(withVoice = false) {
-    if (state === "analyzing" || !pos || passwordFocus) return;
+    if (scanningRef.current || !pos || passwordFocus) return;
+    scanningRef.current = true;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
 
@@ -478,6 +488,8 @@ export default function FloatingCircle() {
       const fallbackVerdict: "ai" | "real" = Math.random() > 0.5 ? "ai" : "real";
       const fallbackConf = 60 + Math.floor(Math.random() * 30);
       showVerdict(fallbackVerdict, fallbackConf, withVoice);
+    } finally {
+      scanningRef.current = false;
     }
   }
 
@@ -553,6 +565,11 @@ export default function FloatingCircle() {
   if (!pos) return null;
 
   const s = STATE_STYLES[state];
+  const skinData = SKINS[skin] ?? SKINS.peach;
+  const effectiveBg = state === "idle" ? skinData.bg : s.bg;
+  const effectiveShadow = state === "idle" ? skinData.shadow : s.shadow;
+  const eyeWhiteColor = state === "idle" ? skinData.eyeWhite : "#fff";
+  const pupilColor = state === "idle" ? skinData.pupil : "#2c2c2c";
   const isAnalyzing = state === "analyzing";
   const showMouth = state === "ai" || state === "real";
   const eyeScaleY = passwordFocus ? 0.07 : sleeping ? 0.12 : shocked ? 1.6 : eyeRolling ? 0.55 : nightMode ? 0.65 : blinkEye && state === "idle" ? 0.1 : 1;
@@ -685,8 +702,8 @@ export default function FloatingCircle() {
           width: "100%",
           height: "100%",
           borderRadius: "50%",
-          background: s.bg,
-          boxShadow: s.shadow,
+          background: effectiveBg,
+          boxShadow: effectiveShadow,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -704,7 +721,7 @@ export default function FloatingCircle() {
               style={{
                 width: s.eyeW,
                 height: s.eyeH,
-                background: "#fff",
+                background: eyeWhiteColor,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -718,7 +735,7 @@ export default function FloatingCircle() {
                 style={{
                   width: effectivePupilW,
                   height: effectivePupilW,
-                  background: "#2c2c2c",
+                  background: pupilColor,
                   borderRadius: "50%",
                   position: "relative",
                   transform: isAnalyzing ? undefined : `translate(${activePupil.x}px, ${activePupil.y}px)`,

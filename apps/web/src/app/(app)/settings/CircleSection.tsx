@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import PricingModal from "@/components/app/PricingModal";
+import { SKIN_LIST, type SkinId } from "@/lib/circleSkins";
 
 export default function CircleSection() {
   const [name, setName] = useState("Circle");
@@ -10,6 +11,7 @@ export default function CircleSection() {
   const [voice, setVoice] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [skin, setSkin] = useState<SkinId>("peach");
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -18,6 +20,7 @@ export default function CircleSection() {
     setVoice(localStorage.getItem("tlc_voice_enabled") === "true");
     const plan = localStorage.getItem("tlc_plan") ?? "free";
     setIsPro(plan === "pro" || plan === "family");
+    setSkin((localStorage.getItem("tlc_circle_skin") as SkinId) || "peach");
   }, []);
 
   function saveName() {
@@ -35,6 +38,13 @@ export default function CircleSection() {
     setStealth(next);
     localStorage.setItem("tlc_stealth", String(next));
     window.dispatchEvent(new CustomEvent("tlcStealthChange", { detail: next }));
+  }
+
+  function selectSkin(id: SkinId) {
+    if (!isPro) return;
+    setSkin(id);
+    localStorage.setItem("tlc_circle_skin", id);
+    window.dispatchEvent(new CustomEvent("tlcSkinChange", { detail: id }));
   }
 
   function toggleVoice() {
@@ -80,6 +90,82 @@ export default function CircleSection() {
               {nameSaved ? "Saved ✓" : "Save"}
             </button>
           </div>
+        </div>
+
+        <div className="border-t border-sky-100" />
+
+        {/* Circle skin */}
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-sm font-medium text-sky-800">Circle skin</p>
+            {!isPro && (
+              <span className="text-[10px] bg-sky-100 text-sky-500 px-1.5 py-0.5 rounded-full font-medium">Pro</span>
+            )}
+          </div>
+          <p className="text-sky-400 text-xs mb-3">Change how your circle looks.</p>
+
+          {isPro ? (
+            <div className="flex gap-3 flex-wrap">
+              {SKIN_LIST.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => selectSkin(s.id)}
+                  title={s.name}
+                  className="flex flex-col items-center gap-1.5 group"
+                >
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      background: s.bg,
+                      boxShadow: skin === s.id
+                        ? `0 0 0 3px #0ea5e9, ${s.shadow}`
+                        : s.shadow,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "box-shadow 0.2s ease",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {[0, 1].map((i) => (
+                        <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: s.eyeWhite, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div style={{ width: 4.5, height: 4.5, borderRadius: "50%", background: s.pupil }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-medium transition-colors ${skin === s.id ? "text-sky-600" : "text-sky-400 group-hover:text-sky-600"}`}>
+                    {s.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3 flex-wrap">
+              {SKIN_LIST.map((s) => (
+                <div key={s.id} className="flex flex-col items-center gap-1.5 opacity-40">
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {[0, 1].map((i) => (
+                        <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: s.eyeWhite, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div style={{ width: 4.5, height: 4.5, borderRadius: "50%", background: s.pupil }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-medium text-sky-400">{s.name}</span>
+                </div>
+              ))}
+              <div className="flex items-center mt-1">
+                <button onClick={() => setShowPricingModal(true)} className="text-xs text-sky-500 font-medium hover:text-sky-700 transition-colors">
+                  Upgrade to Pro to customize →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-sky-100" />
