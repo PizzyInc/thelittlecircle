@@ -51,9 +51,9 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-sky-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sky-400 text-xs">
-            &copy; {new Date().getFullYear()} The Little Circle. A product of{" "}
+            &copy; {new Date().getFullYear()} The Little Circle. Acquired by{" "}
             <a href="https://pizzyholdings.com" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:text-sky-800 transition-colors">
-              Pizzy Holdings
+              PizzyHoldings
             </a>
             .
           </p>
