@@ -86,7 +86,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error(data.error ?? "Failed to create checkout");
+        throw new Error(data.detail ?? data.error ?? "Failed to create checkout");
       }
     } catch (err) {
       setLoading(null);

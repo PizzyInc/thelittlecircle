@@ -3,9 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { setupLS, STORE_ID, VARIANT_IDS, type PlanVariant } from "@/lib/lemonsqueezy";
 
-setupLS();
-
 export async function POST(request: NextRequest) {
+  // Set up inside handler so the API key env var is always available
+  if (!process.env.LEMONSQUEEZY_API_KEY) {
+    console.error("LEMONSQUEEZY_API_KEY is not set");
+    return NextResponse.json({ error: "Payment not configured" }, { status: 500 });
+  }
+  setupLS();
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -37,8 +42,11 @@ export async function POST(request: NextRequest) {
   });
 
   if (error || !data) {
-    console.error("LS checkout error:", error);
-    return NextResponse.json({ error: "Failed to create checkout" }, { status: 500 });
+    console.error("LS checkout error:", JSON.stringify(error));
+    return NextResponse.json(
+      { error: "Failed to create checkout", detail: (error as any)?.message ?? String(error) },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ url: data.data.attributes.url });
