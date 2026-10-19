@@ -1,4 +1,4 @@
-import { getSubscriptions } from "@lemonsqueezy/lemonsqueezy.js";
+import { listSubscriptions } from "@lemonsqueezy/lemonsqueezy.js";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { setupLS } from "@/lib/lemonsqueezy";
@@ -11,7 +11,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   // Find the active subscription for this user
-  const { data, error } = await getSubscriptions({
+  const { data, error } = await listSubscriptions({
     filter: { userEmail: user.email ?? "" },
   });
 
