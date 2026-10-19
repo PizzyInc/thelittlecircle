@@ -126,6 +126,7 @@ export default function FloatingCircle() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceReady, setVoiceReady] = useState(false); // name heard, now capturing query
   const [eyeRolling, setEyeRolling] = useState(false);
+  const [passwordFocus, setPasswordFocus] = useState(false);
 
   const dragStart = useRef({ mx: 0, my: 0, bx: 0, by: 0 });
   const pointerDownTime = useRef(0);
@@ -233,6 +234,29 @@ export default function FloatingCircle() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [state]);
+
+  // Cover eyes on sensitive fields (passwords, CVV, PIN, etc.)
+  useEffect(() => {
+    const SENSITIVE = /password|passwd|pwd|cvv|ssn|secret|pin|credit.?card|card.?num/i;
+
+    function isSensitive(el: EventTarget | null): boolean {
+      if (!el || (el as HTMLElement).tagName !== "INPUT") return false;
+      const input = el as HTMLInputElement;
+      if (input.type === "password") return true;
+      const meta = `${input.name} ${input.id} ${input.getAttribute("autocomplete") ?? ""}`;
+      return SENSITIVE.test(meta);
+    }
+
+    function onFocusIn(e: FocusEvent) { if (isSensitive(e.target)) setPasswordFocus(true); }
+    function onFocusOut(e: FocusEvent) { if (isSensitive(e.target)) setPasswordFocus(false); }
+
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
 
   // Voice: two-phase wake-word listener
   // Phase 1: always listening for the circle's name
@@ -353,7 +377,7 @@ export default function FloatingCircle() {
   }
 
   async function runScan(withVoice = false) {
-    if (state === "analyzing" || !pos) return;
+    if (state === "analyzing" || !pos || passwordFocus) return;
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
 
@@ -444,8 +468,8 @@ export default function FloatingCircle() {
   const s = STATE_STYLES[state];
   const isAnalyzing = state === "analyzing";
   const showMouth = state === "ai" || state === "real";
-  const eyeScaleY = eyeRolling ? 0.55 : (blinkEye && state === "idle" ? 0.1 : 1);
-  const activePupil = eyeRolling ? { x: 0, y: -3.5 } : pupil;
+  const eyeScaleY = passwordFocus ? 0.07 : (eyeRolling ? 0.55 : (blinkEye && state === "idle" ? 0.1 : 1));
+  const activePupil = passwordFocus ? { x: 0, y: 0 } : (eyeRolling ? { x: 0, y: -3.5 } : pupil);
 
   // Circle disabled on this device — render nothing
   if (!circleActive) return null;
