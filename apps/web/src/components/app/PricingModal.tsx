@@ -64,7 +64,7 @@ export default function PricingModal({ open, onClose, onSubscribe }: PricingModa
 
   if (!open) return null;
 
-  function handleCta(planKey: "free" | "pro" | "family") {
+  async function handleCta(planKey: "free" | "pro" | "family") {
     if (planKey === "free") {
       onClose();
       return;
@@ -73,12 +73,23 @@ export default function PricingModal({ open, onClose, onSubscribe }: PricingModa
       onSubscribe(planKey);
       return;
     }
-    // Fallback: brief loading state then close
     setLoading(planKey);
-    setTimeout(() => {
+    try {
+      const variant = `${planKey}_${billing}` as const;
+      const res = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variant }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error ?? "Failed");
+      }
+    } catch {
       setLoading(null);
-      onClose();
-    }, 1500);
+    }
   }
 
   return (

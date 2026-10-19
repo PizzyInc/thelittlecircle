@@ -60,15 +60,31 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [toast, setToast] = useState<string | null>(null);
 
-  function handleCta(plan: (typeof plans)[0]) {
+  async function handleCta(plan: (typeof plans)[0]) {
     if (plan.planKey === "free") {
       document.getElementById("download")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
     if (onPlanSelect) {
       onPlanSelect(plan.planKey);
-    } else {
-      setToast("Coming soon. Payment will be available shortly!");
+      return;
+    }
+    try {
+      const variant = `${plan.planKey}_${billing}`;
+      const res = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variant }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setToast("Could not start checkout. Please try again.");
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch {
+      setToast("Could not start checkout. Please try again.");
       setTimeout(() => setToast(null), 3000);
     }
   }
