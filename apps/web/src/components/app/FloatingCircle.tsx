@@ -127,6 +127,12 @@ export default function FloatingCircle() {
   const [voiceReady, setVoiceReady] = useState(false); // name heard, now capturing query
   const [eyeRolling, setEyeRolling] = useState(false);
   const [passwordFocus, setPasswordFocus] = useState(false);
+  const [sleeping, setSleeping] = useState(false);
+  const [nightMode, setNightMode] = useState(false);
+  const [shocked, setShocked] = useState(false);
+  const [dizzy, setDizzy] = useState(false);
+  const [dizzyOffset, setDizzyOffset] = useState(0);
+  const [darkMode, setDarkMode] = useState(false);
 
   const dragStart = useRef({ mx: 0, my: 0, bx: 0, by: 0 });
   const pointerDownTime = useRef(0);
@@ -135,6 +141,7 @@ export default function FloatingCircle() {
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const highlightedEl = useRef<HTMLElement | null>(null);
   const circleRef = useRef<HTMLDivElement>(null);
+  const sleepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Init position
   useEffect(() => {
@@ -219,15 +226,20 @@ export default function FloatingCircle() {
     return () => clearInterval(id);
   }, [state]);
 
-  // Scroll tracking
+  // Scroll tracking + dizzy on fast scroll
   useEffect(() => {
     if (state === "analyzing" || state === "ai") return;
     let last = window.scrollY;
+    let lastTime = Date.now();
     let timer: ReturnType<typeof setTimeout>;
     function onScroll() {
       const cur = window.scrollY;
+      const now = Date.now();
+      const speed = Math.abs(cur - last) / Math.max(1, now - lastTime);
       setPupil({ x: 0, y: cur > last ? 2 : -2 });
+      if (speed > 3) setDizzy(true);
       last = cur;
+      lastTime = now;
       clearTimeout(timer);
       timer = setTimeout(() => setPupil({ x: 0, y: 0 }), 300);
     }
@@ -257,6 +269,55 @@ export default function FloatingCircle() {
       document.removeEventListener("focusout", onFocusOut);
     };
   }, []);
+
+  // Sleep: after 30s idle, droop eyes and show zzz
+  useEffect(() => {
+    if (state !== "idle" || passwordFocus || !circleActive) {
+      setSleeping(false);
+      if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+      return;
+    }
+    sleepTimerRef.current = setTimeout(() => setSleeping(true), 30000);
+    return () => { if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current); };
+  }, [state, passwordFocus, circleActive]);
+
+  // Night mode: half-closed eyes 10pm–7am
+  useEffect(() => {
+    function check() {
+      const h = new Date().getHours();
+      setNightMode(h >= 22 || h < 7);
+    }
+    check();
+    const id = setInterval(check, 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Dark mode: dilate pupils
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setDarkMode(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Dizzy: oscillate pupils via rAF, auto-clear after 900ms
+  useEffect(() => {
+    if (!dizzy) return;
+    let frame: number;
+    const start = Date.now();
+    function tick() {
+      setDizzyOffset(Math.sin((Date.now() - start) / 70) * 3);
+      frame = requestAnimationFrame(tick);
+    }
+    tick();
+    const timer = setTimeout(() => {
+      cancelAnimationFrame(frame);
+      setDizzy(false);
+      setDizzyOffset(0);
+    }, 900);
+    return () => { cancelAnimationFrame(frame); clearTimeout(timer); };
+  }, [dizzy]);
 
   // Voice: two-phase wake-word listener
   // Phase 1: always listening for the circle's name
@@ -366,6 +427,10 @@ export default function FloatingCircle() {
   }
 
   function showVerdict(verdict: "ai" | "real", confidence: number, withVoice = false) {
+    if (verdict === "ai" && confidence >= 88) {
+      setShocked(true);
+      setTimeout(() => setShocked(false), 750);
+    }
     setState(verdict);
     setBubble({ verdict, confidence });
     if (withVoice && voiceEnabled && isPro) speak(verdict, confidence);
@@ -423,6 +488,12 @@ export default function FloatingCircle() {
   async function handleTap() {
     if (state === "analyzing") return;
 
+    if (sleeping) {
+      setSleeping(false);
+      setBubble(null);
+      return;
+    }
+
     // Tapping a result dismisses it
     if (state === "ai" || state === "real") {
       setState("idle");
@@ -451,6 +522,8 @@ export default function FloatingCircle() {
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!pos) return;
+    setSleeping(false);
+    if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
     hasMoved.current = false;
     pointerDownTime.current = Date.now();
     dragStart.current = { mx: e.clientX, my: e.clientY, bx: pos.x, by: pos.y };
@@ -482,8 +555,10 @@ export default function FloatingCircle() {
   const s = STATE_STYLES[state];
   const isAnalyzing = state === "analyzing";
   const showMouth = state === "ai" || state === "real";
-  const eyeScaleY = passwordFocus ? 0.07 : (eyeRolling ? 0.55 : (blinkEye && state === "idle" ? 0.1 : 1));
-  const activePupil = passwordFocus ? { x: 0, y: 0 } : (eyeRolling ? { x: 0, y: -3.5 } : pupil);
+  const eyeScaleY = passwordFocus ? 0.07 : sleeping ? 0.12 : shocked ? 1.6 : eyeRolling ? 0.55 : nightMode ? 0.65 : blinkEye && state === "idle" ? 0.1 : 1;
+  const activePupil = passwordFocus ? { x: 0, y: 0 } : sleeping ? { x: 0, y: 2.5 } : shocked ? { x: 0, y: -1 } : eyeRolling ? { x: 0, y: -3.5 } : dizzy ? { x: dizzyOffset, y: 0 } : pupil;
+  const effectivePupilW = darkMode ? s.pupilW + 2 : s.pupilW;
+  const eyeTransition = sleeping ? "transform 0.9s ease" : shocked ? "transform 0.06s ease" : "transform 0.08s ease, width 0.3s ease, height 0.3s ease";
 
   // Circle disabled on this device — render nothing
   if (!circleActive) return null;
@@ -496,6 +571,14 @@ export default function FloatingCircle() {
   const bubbleAlignRight = pos.x + SIZE / 2 > window.innerWidth * 0.5;
 
   return (
+    <>
+    <style>{`
+      @keyframes zzzFloat {
+        0%   { opacity: 0; transform: translate(0, 0) scale(0.7); }
+        25%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(5px, -16px) scale(1.1); }
+      }
+    `}</style>
     <div
       ref={circleRef}
       onPointerDown={onPointerDown}
@@ -573,6 +656,13 @@ export default function FloatingCircle() {
         </div>
       )}
 
+      {/* Sleeping zzz */}
+      {sleeping && (
+        <div style={{ position: "absolute", top: -22, right: 2, pointerEvents: "none", fontSize: 14, animation: "zzzFloat 2s ease-out infinite" }}>
+          💤
+        </div>
+      )}
+
       {/* Voice ring — visible when voice is enabled */}
       {voiceEnabled && isPro && (
         <div style={{
@@ -620,14 +710,14 @@ export default function FloatingCircle() {
                 alignItems: "center",
                 justifyContent: "center",
                 transform: `scaleY(${isAnalyzing ? 1 : eyeScaleY})`,
-                transition: "transform 0.08s ease, width 0.3s ease, height 0.3s ease",
+                transition: isAnalyzing ? "transform 0.08s ease" : eyeTransition,
                 overflow: "hidden",
               }}
             >
               <div
                 style={{
-                  width: s.pupilW,
-                  height: s.pupilW,
+                  width: effectivePupilW,
+                  height: effectivePupilW,
                   background: "#2c2c2c",
                   borderRadius: "50%",
                   position: "relative",
@@ -640,8 +730,8 @@ export default function FloatingCircle() {
                 <span
                   style={{
                     position: "absolute",
-                    width: Math.round(s.pupilW * 0.38),
-                    height: Math.round(s.pupilW * 0.38),
+                    width: Math.round(effectivePupilW * 0.38),
+                    height: Math.round(effectivePupilW * 0.38),
                     background: "rgba(255,255,255,0.85)",
                     borderRadius: "50%",
                     top: "18%",
@@ -665,5 +755,6 @@ export default function FloatingCircle() {
         )}
       </div>
     </div>
+    </>
   );
 }
