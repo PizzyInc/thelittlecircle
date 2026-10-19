@@ -42,7 +42,7 @@ const plans = [
   },
   {
     name: "Family",
-    price: { monthly: 9.99, yearly: null },
+    price: { monthly: 9.99, yearly: 79.99 },
     description: "Pro for everyone in your household",
     features: [
       "Everything in Pro",
