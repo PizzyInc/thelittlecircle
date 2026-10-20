@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import ShareDetector from "./ShareDetector";
 
-export const metadata = { title: "Scanning… — The Little Circle" };
+export const metadata = { title: "Scanning… | The Little Circle" };
 
 export default async function SharePage({
   searchParams,

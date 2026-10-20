@@ -157,7 +157,7 @@ export default function DetectPage() {
         <h1 className="text-2xl font-bold text-sky-950">Check content</h1>
         <p className="text-sky-500 text-sm mt-1">
           {isPro
-            ? "Paste text or upload a file — your circle will tell you if it's AI, fake, or real."
+            ? "Paste text or upload a file. Your circle will tell you if it's AI, fake, or real."
             : "Paste text or upload a file to check if it's AI-generated or real."}
         </p>
       </div>
@@ -347,7 +347,7 @@ export default function DetectPage() {
                 Your circle can also spot fake content
               </p>
               <p className="text-xs text-sky-500 mt-0.5 leading-relaxed">
-                On Pro, it does a private background check and comes back within seconds — telling you not just if it&apos;s AI, but if a real person made it to deceive.
+                On Pro, it does a private background check and comes back within seconds, telling you not just if it&apos;s AI, but if a real person made it to deceive.
               </p>
               <button
                 onClick={() => setShowPricingModal(true)}

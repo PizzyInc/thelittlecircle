@@ -18,7 +18,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-semibold text-sky-900 mb-2">What we provide</h2>
-            <p>The Little Circle is an AI and fake content detection tool. Detection results are probabilistic estimates — they are not guaranteed to be correct. Do not rely solely on our results for decisions with serious consequences. We make no warranties about the accuracy of verdicts.</p>
+            <p>The Little Circle is an AI and fake content detection tool. Detection results are probabilistic estimates - they are not guaranteed to be correct. Do not rely solely on our results for decisions with serious consequences. We make no warranties about the accuracy of verdicts.</p>
           </section>
 
           <section>
@@ -34,12 +34,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-semibold text-sky-900 mb-2">Subscriptions and billing</h2>
-            <p>Paid plans are billed through Lemon Squeezy. You can cancel at any time from Settings → Manage subscription. Cancellations take effect at the end of the current billing period — you keep Pro access until then. We do not offer refunds for partial periods.</p>
+            <p>Paid plans are billed through Lemon Squeezy. You can cancel at any time from Settings → Manage subscription. Cancellations take effect at the end of the current billing period - you keep Pro access until then. We do not offer refunds for partial periods.</p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-sky-900 mb-2">Intellectual property</h2>
-            <p>The Little Circle and its branding are our property. You retain ownership of any content you submit for detection — we do not claim any rights over it.</p>
+            <p>The Little Circle and its branding are our property. You retain ownership of any content you submit for detection - we do not claim any rights over it.</p>
           </section>
 
           <section>

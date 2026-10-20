@@ -1,7 +1,7 @@
 import Link from "next/link";
 import CircleLogo from "@/components/CircleLogo";
 
-export const metadata = { title: "Install the Extension — The Little Circle" };
+export const metadata = { title: "Install the Extension | The Little Circle" };
 
 const STEPS = [
   {
@@ -149,7 +149,7 @@ export default function DownloadPage() {
           Install The Little Circle
         </h1>
         <p style={{ fontSize: 14, color: "#0369a1", lineHeight: 1.6 }}>
-          Your AI-detection companion — floating on every page in Chrome.
+          Your AI-detection companion, floating on every page in Chrome.
           We&apos;re submitting to the Chrome Web Store soon.
           Until then, install it in under a minute with the steps below.
         </p>

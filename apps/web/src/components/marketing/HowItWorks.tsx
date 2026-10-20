@@ -17,7 +17,7 @@ const steps = [
   {
     number: "04",
     title: "Know the truth instantly",
-    description: "AI, Fake, or Real — with a confidence score. It tells you visually and speaks the result back to you. Under 2 seconds.",
+    description: "AI, Fake, or Real, with a confidence score. It tells you visually and speaks the result back to you. Under 2 seconds.",
   },
 ];
 

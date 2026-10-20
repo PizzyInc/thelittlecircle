@@ -262,7 +262,7 @@ export default function Hero() {
 
         <p className="text-base sm:text-lg md:text-xl text-sky-600 text-center max-w-sm sm:max-w-xl mb-3 leading-relaxed">
           A little floating circle on every device and website you visit. Tap it,
-          talk to it — it tells you if something is AI, fake, or real. In seconds.
+          talk to it and it tells you if something is AI, fake, or real. In seconds.
         </p>
         <p className="text-sky-500 font-medium text-center mb-10 text-sm sm:text-base">
           Tap or say its name. Know the truth.
