@@ -30,6 +30,14 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get("host") ?? "";
+
+  // Rewrite admin.thelittlecircle.com → /admin/...
+  if (hostname.startsWith("admin.") && !pathname.startsWith("/admin")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin" + (pathname === "/" ? "" : pathname);
+    return NextResponse.rewrite(url);
+  }
 
   // Protect /dashboard, /settings, and /admin routes
   const isProtected =
