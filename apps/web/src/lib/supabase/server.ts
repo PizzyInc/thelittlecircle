@@ -14,9 +14,10 @@ export const createClient = cache(async () => {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options?: Parameters<typeof cookieStore.set>[2] }[]) {
+          const domain = process.env.NODE_ENV === "production" ? ".thelittlecircle.com" : undefined;
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, { ...options, ...(domain ? { domain } : {}) })
             );
           } catch {
             // setAll called from a Server Component — cookies will be set by middleware
