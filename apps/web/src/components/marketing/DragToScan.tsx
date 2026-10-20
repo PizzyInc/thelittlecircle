@@ -271,7 +271,7 @@ export default function DragToScan() {
                   >
                     <span style={{ fontSize: 13 }}>🤖</span>
                     <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>
-                      AI Generated
+                      AI
                     </span>
                     <span
                       style={{

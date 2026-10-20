@@ -158,7 +158,7 @@ export default function HowItWorks() {
               <div className="bg-white rounded-2xl shadow-lg shadow-sky-100 px-6 py-5 flex flex-col gap-3 min-w-[200px]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">!</span>
-                  <span className="font-semibold text-gray-900 text-sm">AI Generated</span>
+                  <span className="font-semibold text-gray-900 text-sm">AI</span>
                   <span className="ml-auto text-xs text-gray-400 font-medium">97%</span>
                 </div>
                 <div className="h-px bg-gray-100" />
@@ -171,7 +171,7 @@ export default function HowItWorks() {
               <div className="bg-white rounded-2xl shadow-lg shadow-red-50 px-6 py-5 flex flex-col gap-3 min-w-[200px]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">⚠</span>
-                  <span className="font-semibold text-gray-900 text-sm">Likely Fake</span>
+                  <span className="font-semibold text-gray-900 text-sm">Fake</span>
                   <span className="ml-auto text-xs text-gray-400 font-medium">88%</span>
                 </div>
                 <div className="h-px bg-gray-100" />

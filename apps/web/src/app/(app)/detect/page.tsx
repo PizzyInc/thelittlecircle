@@ -303,7 +303,7 @@ export default function DetectPage() {
               <p className={`text-base font-bold ${
                 result.verdict === "ai" ? "text-orange-700" : result.verdict === "fake" ? "text-red-700" : "text-green-700"
               }`}>
-                {result.verdict === "ai" ? "AI Generated" : result.verdict === "fake" ? "Fake" : "Real"}
+                {result.verdict === "ai" ? "AI" : result.verdict === "fake" ? "Fake" : "Real"}
                 <span className="font-normal text-sm ml-2 opacity-70">· {result.confidence}%</span>
               </p>
               <p className={`text-sm mt-0.5 ${
