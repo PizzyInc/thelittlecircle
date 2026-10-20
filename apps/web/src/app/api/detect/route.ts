@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 30;
+
 type Verdict = "ai" | "real" | "fake";
 
 function mock(pro = false): { verdict: Verdict; confidence: number; provider: string } {
@@ -37,7 +39,7 @@ async function ranteraDetect(
         Accept: "application/json",
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(7000),
     });
 
     if (!res.ok) return null;

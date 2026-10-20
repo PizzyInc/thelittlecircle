@@ -9,7 +9,7 @@ const EXCLUDED = [
 
 function isEligible(url: string | undefined): boolean {
   if (!url) return false;
-  if (url.startsWith("chrome://") || url.startsWith("chrome-extension://") || url.startsWith("edge://")) return false;
+  if (url.startsWith("chrome://") || url.startsWith("chrome-extension://") || url.startsWith("edge://") || url.startsWith("file://")) return false;
   try {
     const host = new URL(url).hostname;
     return !EXCLUDED.includes(host);

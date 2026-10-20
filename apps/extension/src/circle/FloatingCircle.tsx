@@ -52,12 +52,15 @@ interface VerdictBubble {
 
 function getStorage<T>(key: string, fallback: T): Promise<T> {
   return new Promise((res) => {
-    chrome.storage.local.get(key, (result) => res((result[key] as T) ?? fallback));
+    try {
+      if (!chrome?.storage?.local) { res(fallback); return; }
+      chrome.storage.local.get(key, (result) => res((result[key] as T) ?? fallback));
+    } catch { res(fallback); }
   });
 }
 
 function setStorage(key: string, value: unknown) {
-  chrome.storage.local.set({ [key]: value });
+  try { chrome?.storage?.local?.set({ [key]: value }); } catch {}
 }
 
 async function extractContent(cx: number, cy: number): Promise<{
@@ -160,8 +163,8 @@ export default function FloatingCircle() {
       }
       if (changes.tlc_token) setAuthToken(changes.tlc_token.newValue);
     };
-    chrome.storage.onChanged.addListener(onChange);
-    return () => chrome.storage.onChanged.removeListener(onChange);
+    try { chrome?.storage?.onChanged?.addListener(onChange); } catch {}
+    return () => { try { chrome?.storage?.onChanged?.removeListener(onChange); } catch {} };
   }, []);
 
   useEffect(() => {
@@ -315,8 +318,9 @@ export default function FloatingCircle() {
       });
       clearTimeout(timeoutId);
       removeHighlight();
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "failed");
+      let data: Record<string, unknown>;
+      try { data = await res.json(); } catch { throw new Error("server error"); }
+      if (!res.ok) throw new Error((data.error as string) ?? `server error ${res.status}`);
 
       clearTimeout(safetyTimer);
       const verdict = data.verdict as "ai" | "real" | "fake";
