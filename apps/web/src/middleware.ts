@@ -46,6 +46,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/admin");
 
   if (isProtected && !user) {
+    if (hostname.startsWith("admin.")) {
+      return NextResponse.redirect("https://www.thelittlecircle.com/login");
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -58,9 +61,7 @@ export async function middleware(request: NextRequest) {
       .map((e) => e.trim())
       .filter(Boolean);
     if (adminEmails.length > 0 && !adminEmails.includes(user.email ?? "")) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
+      return NextResponse.redirect("https://www.thelittlecircle.com/");
     }
   }
 
