@@ -16,6 +16,11 @@
     overflow-x: hidden;
   }
 
+  /* Prevent iOS Safari from zooming in on focused inputs */
+  input, textarea, select {
+    font-size: max(16px, 1em);
+  }
+
   body {
     background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
     min-height: 100vh;
