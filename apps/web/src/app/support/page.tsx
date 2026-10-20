@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Support — The Little Circle",
   description: "Get help with The Little Circle — AI detection for images, text, and more.",
+  openGraph: { title: "Support — The Little Circle" },
 };
 
 const faqs = [
