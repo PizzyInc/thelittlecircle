@@ -153,7 +153,7 @@ export default function ShareDetector({ text, url, title }: Props) {
               color: stage === "ai" ? "#c05010" : "#147048",
               marginBottom: 10,
             }}>
-              {stage === "ai" ? "🤖 AI Generated" : "✅ Looks Real"}
+              {stage === "ai" ? "🤖 AI" : "✅ Real"}
             </p>
             <span style={{
               display: "inline-block",

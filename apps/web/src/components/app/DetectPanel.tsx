@@ -197,7 +197,7 @@ export default function DetectPanel({ onClose, onAnalyzing, onResult }: DetectPa
               </span>
               <div>
                 <p className={`text-sm font-bold ${result.verdict === "ai" ? "text-orange-700" : "text-green-700"}`}>
-                  {result.verdict === "ai" ? "AI Generated" : "Looks Real"} · {result.confidence}%
+                  {result.verdict === "ai" ? "AI" : result.verdict === "fake" ? "Fake" : "Real"} · {result.confidence}%
                 </p>
                 <p className={`text-xs mt-0.5 ${result.verdict === "ai" ? "text-orange-500" : "text-green-500"}`}>
                   {result.confidence >= 85 ? "High confidence" : result.confidence >= 65 ? "Medium confidence" : "Low confidence"}

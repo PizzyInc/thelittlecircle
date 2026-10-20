@@ -437,20 +437,20 @@ export default function FloatingCircle() {
     const lines =
       verdict === "ai"
         ? [
-            `Looks AI-generated to me. ${confidence}% sure.`,
-            `I'm detecting AI here, about ${confidence}% confident.`,
-            `That's AI. ${name} is ${confidence}% certain.`,
+            `AI. ${confidence}% confidence.`,
+            `AI generated. ${name} is ${confidence}% certain.`,
+            `That's AI, ${confidence}% confident.`,
           ]
         : verdict === "fake"
         ? [
-            `This looks fake to me. ${confidence}% sure.`,
-            `I'm detecting misinformation here, about ${confidence}% confident.`,
-            `That seems fabricated. ${confidence}% certain.`,
+            `Fake. ${confidence}% confidence.`,
+            `Fake content. ${confidence}% certain.`,
+            `That's fabricated. ${confidence}% confident.`,
           ]
         : [
-            `This looks real. ${confidence}% confident.`,
-            `Seems genuine to me, around ${confidence}%.`,
-            `I think a person made this. ${confidence}% sure.`,
+            `Real. ${confidence}% confidence.`,
+            `That's real. ${confidence}% certain.`,
+            `Genuine content, ${confidence}% confident.`,
           ];
     const text = lines[Math.floor(Math.random() * lines.length)];
     window.speechSynthesis.cancel();
@@ -712,9 +712,9 @@ export default function FloatingCircle() {
             <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: 0.2 }}>
               {bubble.verdict === "info"
                 ? bubble.message
-                : bubble.verdict === "ai" ? "AI Generated"
-                : bubble.verdict === "fake" ? "Likely Fake"
-                : "Looks Real"}
+                : bubble.verdict === "ai" ? "AI"
+                : bubble.verdict === "fake" ? "Fake"
+                : "Real"}
             </span>
             {bubble.verdict !== "info" && bubble.confidence !== undefined && (
               <span style={{
