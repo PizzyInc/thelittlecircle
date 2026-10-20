@@ -24,9 +24,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-sky-900 mb-2">Third-party services</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Supabase</strong> - authentication and database storage.</li>
-              <li><strong>Hive AI</strong> - AI content detection for text and images. Content you submit is sent to Hive for analysis and is subject to their privacy policy.</li>
-              <li><strong>Anthropic Claude</strong> - additional analysis for images and Pro fake-detection. Content is sent to Anthropic and is subject to their privacy policy.</li>
+              <li><strong>Rantera</strong> - AI-powered content detection. Content you submit for analysis is processed by Rantera and is subject to their privacy policy.</li>
               <li><strong>Lemon Squeezy</strong> - payment processing. We never store your card details.</li>
             </ul>
           </section>

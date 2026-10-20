@@ -9,7 +9,7 @@ const FAQS = [
   },
   {
     q: "How does detection work?",
-    a: "We combine two detection engines: Hive AI (a purpose-built AI detection model) and Claude (Anthropic's vision model). For most content both run in parallel and we combine their signals. Pro users also get fake-content detection, which looks for human-made but deliberately misleading content.",
+    a: "We use Rantera, an AI-powered detection engine built for exactly this. It analyses the content and returns a verdict with a confidence score. Pro users also get fake-content detection, which looks for human-made but deliberately misleading content.",
   },
   {
     q: "Is the detection always accurate?",
@@ -33,7 +33,7 @@ const FAQS = [
   },
   {
     q: "Is my content private?",
-    a: "Content you submit is sent to our detection partners (Hive AI and Anthropic) for analysis. We store the verdict and the first 200 characters of text for your history - never full files. See our Privacy Policy for details.",
+    a: "Content you submit is sent to Rantera for analysis. We store the verdict and the first 200 characters of text for your history - never full files. See our Privacy Policy for details.",
   },
   {
     q: "I found a bug or have a feature request.",
