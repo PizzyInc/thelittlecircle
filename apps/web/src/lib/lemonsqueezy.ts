@@ -10,7 +10,7 @@ export const STORE_ID = "501579";
 
 export const VARIANT_IDS = {
   pro_monthly:    "2267758",
-  pro_yearly:     "1452890",
+  pro_yearly:     "2267760",
   family_monthly: "2267763",
   family_yearly:  "2267767",
 } as const;
