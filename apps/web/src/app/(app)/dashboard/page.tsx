@@ -76,6 +76,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [upgraded, setUpgraded] = useState(false);
+  const [upgradedPlan, setUpgradedPlan] = useState<"pro" | "family" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(todayLocalYMD());
   const [view, setView] = useState<"list" | "chart">("list");
@@ -94,19 +95,34 @@ export default function DashboardPage() {
   const [chartData, setChartData] = useState<DayData[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
 
-  // Show upgrade banner and sync plan from Supabase
+  // Show upgrade banner and sync plan from Supabase, polling until webhook lands
   useEffect(() => {
     if (searchParams.get("upgraded") === "1") {
       setUpgraded(true);
-      fetch("/api/plan")
-        .then((r) => r.json())
-        .then(({ plan }) => {
-          if (plan === "pro" || plan === "family") {
-            localStorage.setItem("tlc_plan", plan);
-          }
-        })
-        .catch(() => {});
       router.replace("/dashboard", { scroll: false });
+
+      let attempts = 0;
+      const MAX_ATTEMPTS = 8;
+      const poll = () => {
+        fetch("/api/plan")
+          .then((r) => r.json())
+          .then(({ plan }: { plan: string }) => {
+            if (plan === "pro" || plan === "family") {
+              localStorage.setItem("tlc_plan", plan);
+              setUpgradedPlan(plan);
+            } else if (attempts < MAX_ATTEMPTS) {
+              attempts++;
+              setTimeout(poll, 2000);
+            }
+          })
+          .catch(() => {
+            if (attempts < MAX_ATTEMPTS) {
+              attempts++;
+              setTimeout(poll, 2000);
+            }
+          });
+      };
+      poll();
     }
 
     // After signup from landing page with a plan selected — trigger checkout
@@ -274,12 +290,25 @@ export default function DashboardPage() {
     <div>
       {upgraded && (
         <div className="flex items-start gap-3 mb-6 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-          <span className="text-xl">🎉</span>
+          <span className="text-xl">{upgradedPlan ? "🎉" : "⏳"}</span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-emerald-800">Welcome to Pro!</p>
-            <p className="text-xs text-emerald-600 mt-0.5">
-              Your circle can now detect AI, Fake, and Real content. Tap it on any page to try.
-            </p>
+            {upgradedPlan ? (
+              <>
+                <p className="text-sm font-semibold text-emerald-800">
+                  Welcome to {upgradedPlan === "family" ? "Family" : "Pro"}!
+                </p>
+                <p className="text-xs text-emerald-600 mt-0.5">
+                  Your circle can now detect AI, Fake, and Real content. Tap it on any page to try.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-emerald-800">Payment confirmed!</p>
+                <p className="text-xs text-emerald-600 mt-0.5">
+                  Activating your subscription, just a moment...
+                </p>
+              </>
+            )}
           </div>
           <button
             onClick={() => setUpgraded(false)}
