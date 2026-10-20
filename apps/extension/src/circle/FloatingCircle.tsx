@@ -323,7 +323,11 @@ export default function FloatingCircle() {
       removeHighlight();
       setState("idle");
       scanningRef.current = false;
-      if (!(err instanceof Error && err.name === "AbortError")) console.warn("[TLC] detection error:", err);
+      const isAbort = err instanceof Error && err.name === "AbortError";
+      if (!isAbort) console.warn("[TLC] detection error:", err);
+      setBubble({ verdict: "info", message: isAbort ? "Timed out — try again" : "Couldn't connect — try again" });
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      bubbleTimer.current = setTimeout(() => setBubble(null), 4000);
     }
   }
 

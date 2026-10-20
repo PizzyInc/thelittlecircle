@@ -3,6 +3,7 @@
 const EXCLUDED = [
   "thelittlecircle.com",
   "www.thelittlecircle.com",
+  "admin.thelittlecircle.com",
   "localhost",
 ];
 

@@ -22,6 +22,7 @@
       "exclude_matches": [
         "https://thelittlecircle.com/*",
         "https://www.thelittlecircle.com/*",
+        "https://admin.thelittlecircle.com/*",
         "http://localhost:3000/*",
         "http://localhost:3001/*"
       ]
