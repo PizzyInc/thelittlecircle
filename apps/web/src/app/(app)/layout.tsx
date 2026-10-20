@@ -8,6 +8,7 @@ import DeviceLimitModal from "@/components/app/DeviceLimitModal";
 import CircleNameOnboarding from "@/components/app/CircleNameOnboarding";
 import NavProgress from "@/components/app/NavProgress";
 import CircleLogo from "@/components/CircleLogo";
+import BrandName from "@/components/app/BrandName";
 import ExtensionBanner from "@/components/app/ExtensionBanner";
 import MobileInstallBanner from "@/components/app/MobileInstallBanner";
 import BottomTabBar from "@/components/app/BottomTabBar";
@@ -35,7 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="h-14 bg-white border-b border-sky-200 flex items-center px-4 sm:px-6 gap-2 sm:gap-4 flex-shrink-0">
         <Link href="/" className="flex items-center gap-2 mr-2 sm:mr-6 shrink-0">
           <CircleLogo size={24} />
-          <span className="font-semibold text-sky-900 text-sm hidden sm:block">The Little Circle</span>
+          <BrandName />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1 flex-1">

@@ -14,7 +14,7 @@ const modalities = [
   {
     icon: FileText,
     title: "Text",
-    description: "ChatGPT-written content, bot messages, AI copy",
+    description: "AI-written content, bot messages, AI copy",
   },
   {
     icon: Mic,

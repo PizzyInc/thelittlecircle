@@ -60,13 +60,16 @@ interface VerdictBubble {
   message?: string;
 }
 
-async function extractContent(cx: number, cy: number): Promise<{
+async function extractContent(cx: number, cy: number, circleEl?: HTMLElement | null): Promise<{
   type: "text" | "image";
   content: string;
   el: HTMLElement | null;
 }> {
-  // 1. Image at cursor? Try canvas for same-origin; skip cross-origin.
-  const hitEl = document.elementFromPoint(cx, cy);
+  // 1. Image at cursor? Use elementsFromPoint to look UNDER the circle itself.
+  const allEls = Array.from(document.elementsFromPoint(cx, cy));
+  const hitEl = allEls.find(el =>
+    !circleEl || (el !== circleEl && !circleEl.contains(el))
+  ) ?? null;
   if (hitEl) {
     const imgEl =
       hitEl.tagName === "IMG"
@@ -495,7 +498,7 @@ export default function FloatingCircle() {
     const cy = pos.y + SIZE / 2;
 
     setState("analyzing");
-    const { type, content, el } = await extractContent(cx, cy);
+    const { type, content, el } = await extractContent(cx, cy, circleRef.current);
 
     if (el) {
       el.style.outline = "2px solid rgba(100, 140, 255, 0.55)";
@@ -603,7 +606,13 @@ export default function FloatingCircle() {
   function onPointerUp() {
     setDragging(false);
     const elapsed = Date.now() - pointerDownTime.current;
-    if (!hasMoved.current && elapsed < TAP_MAX_MS) handleTap();
+    if (!hasMoved.current && elapsed < TAP_MAX_MS) {
+      // Short press with no movement = tap
+      handleTap();
+    } else if (hasMoved.current) {
+      // Drag release = scan what's under the new position
+      runScan(false);
+    }
   }
 
   if (!pos) return null;

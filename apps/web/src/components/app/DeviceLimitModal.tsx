@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
 import { Check } from "lucide-react";
 
 const PLANS = [
@@ -11,7 +10,7 @@ const PLANS = [
     price: "$4.99/mo",
     sub: "or $39.99/yr",
     features: ["All your devices", "Unlimited checks", "Auto-detect", "Always-On mode"],
-    href: "/checkout?plan=pro",
+    variant: "pro_monthly" as const,
     highlight: true,
   },
   {
@@ -19,13 +18,15 @@ const PLANS = [
     price: "$9.99/mo",
     sub: "up to 6 accounts",
     features: ["Everything in Pro", "6 separate accounts", "One bill", "Shared family plan"],
-    href: "/checkout?plan=family",
+    variant: "family_monthly" as const,
     highlight: false,
   },
 ];
 
 export default function DeviceLimitModal() {
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -49,6 +50,27 @@ export default function DeviceLimitModal() {
       window.removeEventListener("storage", onStorage);
     };
   }, [pathname]);
+
+  async function startCheckout(variant: string) {
+    setLoading(variant);
+    setError(null);
+    try {
+      const res = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variant }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.detail ?? data.error ?? "Failed to create checkout");
+      }
+    } catch (err) {
+      setLoading(null);
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    }
+  }
 
   if (!show) return null;
 
@@ -125,27 +147,36 @@ export default function DeviceLimitModal() {
         </p>
 
         {/* Plan cards */}
+        {error && (
+          <p style={{ fontSize: 12, color: "#dc2626", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "8px 12px", marginBottom: 12, textAlign: "center" }}>
+            {error}
+          </p>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
           {PLANS.map((plan) => (
-            <a
+            <button
               key={plan.name}
-              href={plan.href}
+              onClick={() => startCheckout(plan.variant)}
+              disabled={loading !== null}
               style={{
                 display: "block",
                 padding: "20px 16px",
                 borderRadius: 18,
-                textDecoration: "none",
+                textAlign: "left",
                 background: plan.highlight ? "linear-gradient(145deg, #0ea5e9, #0284c7)" : "#f0f9ff",
                 border: plan.highlight ? "none" : "1.5px solid #bae6fd",
                 boxShadow: plan.highlight ? "0 8px 24px rgba(14,165,233,0.35)" : "none",
-                transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                transition: "transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease",
+                cursor: loading !== null ? "wait" : "pointer",
+                opacity: loading !== null && loading !== plan.variant ? 0.6 : 1,
+                width: "100%",
               }}
             >
               <p style={{ fontSize: 15, fontWeight: 700, color: plan.highlight ? "#fff" : "#0c4a6e", marginBottom: 2 }}>
                 {plan.name}
               </p>
               <p style={{ fontSize: 18, fontWeight: 800, color: plan.highlight ? "#fff" : "#0369a1", marginBottom: 2 }}>
-                {plan.price}
+                {loading === plan.variant ? "Setting up…" : plan.price}
               </p>
               <p style={{ fontSize: 11, color: plan.highlight ? "rgba(255,255,255,0.7)" : "#64B5D9", marginBottom: 14 }}>
                 {plan.sub}
@@ -158,7 +189,7 @@ export default function DeviceLimitModal() {
                   </li>
                 ))}
               </ul>
-            </a>
+            </button>
           ))}
         </div>
 
