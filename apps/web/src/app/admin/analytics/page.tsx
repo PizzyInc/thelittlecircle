@@ -31,7 +31,7 @@ export default async function AdminAnalyticsPage() {
     { data: recentDetections },
     { data: profiles },
   ] = await Promise.all([
-    admin.auth.admin.listUsers({ perPage: 1 }),
+    admin.from("user_profiles").select("*", { count: "exact", head: true }),
     admin.from("detections").select("verdict, type, user_id, confidence"),
     admin.from("detections")
       .select("created_at, verdict")
