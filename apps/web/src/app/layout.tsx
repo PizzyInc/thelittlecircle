@@ -9,6 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://thelittlecircle.com"),
   title: "The Little Circle - Your companion that tells you what's real",
   description:
     "A little floating circle on all your devices. Tap it to know if what you're seeing is AI or not. Detects AI-generated images, video, text, audio, and live calls instantly.",
@@ -63,11 +64,21 @@ export const metadata: Metadata = {
     description: "Your companion that tells you what's real.",
     siteName: "The Little Circle",
     type: "website",
+    url: "https://thelittlecircle.com",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "The Little Circle" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "The Little Circle",
     description: "Your companion that tells you what's real.",
+    site: "@littleaicircle",
+    creator: "@littleaicircle",
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 
