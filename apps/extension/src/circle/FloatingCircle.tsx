@@ -74,7 +74,7 @@ async function extractContent(cx: number, cy: number): Promise<{
         : (hitEl.closest("img") as HTMLImageElement | null);
     if (imgEl?.src && /^https?:/.test(imgEl.src)) {
       try {
-        const res = await fetch(imgEl.src);
+        const res = await fetch(imgEl.src, { signal: AbortSignal.timeout(6000) });
         const blob = await res.blob();
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
@@ -269,6 +269,14 @@ export default function FloatingCircle() {
     if (scanningRef.current || !pos) return;
     scanningRef.current = true;
 
+    // Safety net: if anything hangs, always reset after 20s
+    const safetyTimer = setTimeout(() => {
+      scanningRef.current = false;
+      setState("idle");
+      setBubble({ verdict: "info", message: "Timed out — try again" });
+      setTimeout(() => setBubble(null), 4000);
+    }, 20000);
+
     const cx = pos.x + SIZE / 2;
     const cy = pos.y + SIZE / 2;
 
@@ -277,6 +285,7 @@ export default function FloatingCircle() {
     const { type, content, el } = await extractContent(cx, cy);
 
     if (type === "text" && content.length < 250) {
+      clearTimeout(safetyTimer);
       setState("idle");
       scanningRef.current = false;
       setBubble({ verdict: "info", message: "Not enough text to scan" });
@@ -309,6 +318,7 @@ export default function FloatingCircle() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "failed");
 
+      clearTimeout(safetyTimer);
       const verdict = data.verdict as "ai" | "real" | "fake";
       setState(verdict);
       setBubble({ verdict, confidence: data.confidence });
@@ -319,6 +329,7 @@ export default function FloatingCircle() {
       stateTimer.current = setTimeout(() => { setState("idle"); scanningRef.current = false; }, 8000);
       bubbleTimer.current = setTimeout(() => setBubble(null), 5000);
     } catch (err) {
+      clearTimeout(safetyTimer);
       clearTimeout(timeoutId);
       removeHighlight();
       setState("idle");
