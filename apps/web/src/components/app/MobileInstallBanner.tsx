@@ -101,7 +101,7 @@ export default function MobileInstallBanner() {
                     : "We're actively building it. You'll be notified as soon as it's live on the Play Store."}
                 </p>
                 <p style={{ fontSize: 11, color: accentMid, lineHeight: 1.5, opacity: 0.75 }}>
-                  In the meantime, use manual detection right here on mobile or grab the Chrome extension on desktop.
+                  In the meantime, use manual detection right here on mobile or grab the Chrome extension to use the circle anywhere on web.
                 </p>
               </>
             )}
