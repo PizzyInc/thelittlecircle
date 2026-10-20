@@ -61,7 +61,7 @@ async function rantAIDetect(
   content: string,
   pro = false,
 ): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
-  const apiKey = process.env.RANT_AI_KEY ?? process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.RANTERA_KEY ?? process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return mock(pro);
 
   const client = new RantAI({ apiKey });
