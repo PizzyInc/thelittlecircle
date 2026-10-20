@@ -247,10 +247,10 @@ export default function FloatingCircle() {
     if (!("speechSynthesis" in window)) return;
     const variants =
       verdict === "ai"
-        ? [`Looks AI-generated — ${confidence}% sure.`, `I'm detecting AI here. About ${confidence}% confident.`]
+        ? [`AI. ${confidence}% confidence.`, `AI generated. ${confidence}% certain.`]
         : verdict === "fake"
-        ? [`This looks fake — ${confidence}% sure.`, `Careful, this seems designed to mislead. About ${confidence}% confident.`]
-        : [`This looks real. ${confidence}% confident.`, `Seems genuine to me — around ${confidence}%.`];
+        ? [`Fake. ${confidence}% confidence.`, `Fake content. ${confidence}% certain.`]
+        : [`Real. ${confidence}% confidence.`, `That's real. ${confidence}% certain.`];
     const u = new SpeechSynthesisUtterance(variants[Math.floor(Math.random() * variants.length)]);
     u.rate = 0.97; u.pitch = 1.1;
     window.speechSynthesis.cancel();
@@ -434,10 +434,10 @@ export default function FloatingCircle() {
               {bubble.verdict === "info"
                 ? bubble.message
                 : bubble.verdict === "ai"
-                ? "AI Generated"
+                ? "AI"
                 : bubble.verdict === "fake"
-                ? "Likely Fake"
-                : "Looks Real"}
+                ? "Fake"
+                : "Real"}
             </span>
             {bubble.verdict !== "info" && bubble.confidence !== undefined && (
               <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, background: "rgba(0,0,0,0.15)", borderRadius: 10, padding: "1px 6px" }}>
