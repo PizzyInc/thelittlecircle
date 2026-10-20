@@ -33,7 +33,8 @@ function LoginForm() {
       }
       setLoading(false);
     } else {
-      router.push(pendingPlan ? `/dashboard?checkout=${pendingPlan}` : "/dashboard");
+      const isAdmin = typeof window !== "undefined" && window.location.hostname.startsWith("admin.");
+      router.push(isAdmin ? "/admin" : pendingPlan ? `/dashboard?checkout=${pendingPlan}` : "/dashboard");
     }
   }
 

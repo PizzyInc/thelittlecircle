@@ -33,8 +33,10 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get("host") ?? "";
 
-  // Rewrite admin.thelittlecircle.com → /admin/...
-  if (hostname.startsWith("admin.") && !pathname.startsWith("/admin")) {
+  const isAdminSubdomain = hostname.startsWith("admin.");
+
+  // Rewrite admin.thelittlecircle.com → /admin/... (skip /login so it serves the real login page)
+  if (isAdminSubdomain && !pathname.startsWith("/admin") && pathname !== "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/admin" + (pathname === "/" ? "" : pathname);
     return NextResponse.rewrite(url);
@@ -47,9 +49,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/admin");
 
   if (isProtected && !user) {
-    if (hostname.startsWith("admin.")) {
-      return NextResponse.redirect("https://www.thelittlecircle.com/login");
-    }
+    // On admin subdomain: redirect to login on the same subdomain
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -69,7 +69,8 @@ export async function middleware(request: NextRequest) {
   // Redirect logged-in users away from login/signup
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    // On admin subdomain, send to /admin after login
+    url.pathname = isAdminSubdomain ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
 
