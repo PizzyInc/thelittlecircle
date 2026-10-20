@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Users, BarChart2, Settings, LogOut } from "lucide-react";
+import { Users, BarChart2, List, LogOut } from "lucide-react";
 
 const navItems = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/detections", label: "Detections", icon: List },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

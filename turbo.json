@@ -20,6 +20,7 @@
         "RANTERA_API_KEY",
         "RANTERA_KEY",
         "RANTERA_ENDPOINT",
+        "ADMIN_EMAILS",
         "LEMONSQUEEZY_API_KEY",
         "LEMONSQUEEZY_WEBHOOK_SECRET",
         "HIVE_AI_API_KEY",

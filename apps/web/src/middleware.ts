@@ -43,6 +43,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Admin-only gate — only allowlisted emails can access /admin
+  if (pathname.startsWith("/admin") && user) {
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+    if (adminEmails.length > 0 && !adminEmails.includes(user.email ?? "")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Redirect logged-in users away from login/signup
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone();
