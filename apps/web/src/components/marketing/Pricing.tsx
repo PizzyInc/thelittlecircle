@@ -89,13 +89,17 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setToast("Could not start checkout. Please try again.");
-        setTimeout(() => setToast(null), 3000);
+        const msg = data.detail ?? data.error ?? "Could not start checkout. Please try again.";
+        setToast(msg);
+        setTimeout(() => setToast(null), 5000);
       }
-    } catch {
+    } catch (err) {
       clearTimeout(timeout);
-      setToast("Could not start checkout. Please try again.");
-      setTimeout(() => setToast(null), 3000);
+      const msg = err instanceof Error && err.message.includes("abort")
+        ? "Request timed out. Please try again."
+        : "Could not start checkout. Please try again.";
+      setToast(msg);
+      setTimeout(() => setToast(null), 5000);
     }
   }
 
