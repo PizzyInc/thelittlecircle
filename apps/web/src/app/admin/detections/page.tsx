@@ -33,11 +33,21 @@ function fmt(iso: string) {
 export default async function AdminDetectionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ verdict?: string; type?: string; page?: string }>;
+  searchParams: Promise<{ verdict?: string; type?: string; user?: string; page?: string }>;
 }) {
-  const { verdict: vFilter, type: tFilter, page: pageStr } = await searchParams;
+  const { verdict: vFilter, type: tFilter, user: uFilter, page: pageStr } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
   const admin = adminClient();
+
+  // Resolve email filter → user_id
+  let filteredUserId: string | null = null;
+  if (uFilter) {
+    const { data: found } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const match = (found?.users ?? []).find((u) =>
+      u.email?.toLowerCase().includes(uFilter.toLowerCase())
+    );
+    filteredUserId = match?.id ?? "no-match";
+  }
 
   let query = admin
     .from("detections")
@@ -47,6 +57,7 @@ export default async function AdminDetectionsPage({
 
   if (vFilter && vFilter !== "all") query = query.eq("verdict", vFilter);
   if (tFilter && tFilter !== "all") query = query.eq("type", tFilter);
+  if (filteredUserId) query = query.eq("user_id", filteredUserId);
 
   const { data: detections, count } = await query;
 
@@ -66,6 +77,7 @@ export default async function AdminDetectionsPage({
     const params = new URLSearchParams();
     if (vFilter && vFilter !== "all") params.set("verdict", vFilter);
     if (tFilter && tFilter !== "all") params.set("type", tFilter);
+    if (uFilter) params.set("user", uFilter);
     params.set("page", String(p));
     return `/admin/detections?${params.toString()}`;
   };
@@ -77,7 +89,14 @@ export default async function AdminDetectionsPage({
           <h1 className="text-2xl font-bold text-slate-900">Detections</h1>
           <p className="text-slate-500 text-sm mt-0.5">{(count ?? 0).toLocaleString()} total</p>
         </div>
-        <form className="flex items-center gap-2">
+        <form className="flex items-center gap-2 flex-wrap">
+          <input
+            name="user"
+            defaultValue={uFilter}
+            type="search"
+            placeholder="Filter by email..."
+            className="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 w-48"
+          />
           <select name="verdict" defaultValue={vFilter ?? "all"} className="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
             <option value="all">All verdicts</option>
             <option value="ai">AI</option>
