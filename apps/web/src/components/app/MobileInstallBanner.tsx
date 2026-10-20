@@ -95,10 +95,13 @@ export default function MobileInstallBanner() {
                 <p style={{ fontWeight: 700, fontSize: 13, color: accent, marginBottom: 4 }}>
                   {isIOS ? "iOS app is on its way" : "Android app is on its way"}
                 </p>
-                <p style={{ fontSize: 12, color: accentMid, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 12, color: accentMid, lineHeight: 1.5, marginBottom: 6 }}>
                   {isIOS
                     ? "We're actively building it. You'll be notified as soon as it's live on the App Store."
                     : "We're actively building it. You'll be notified as soon as it's live on the Play Store."}
+                </p>
+                <p style={{ fontSize: 11, color: accentMid, lineHeight: 1.5, opacity: 0.75 }}>
+                  In the meantime, use manual detection right here on mobile or grab the Chrome extension on desktop.
                 </p>
               </>
             )}
