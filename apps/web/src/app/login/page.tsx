@@ -26,6 +26,8 @@ function LoginForm() {
       if (error.message.toLowerCase().includes("invalid login credentials") ||
           error.message.toLowerCase().includes("invalid credentials")) {
         setError("Email or password incorrect. If you don't have an account yet, create one below.");
+      } else if (error.message.toLowerCase().includes("email not confirmed")) {
+        setError("Please check your email and click the confirmation link before signing in.");
       } else {
         setError(error.message);
       }
