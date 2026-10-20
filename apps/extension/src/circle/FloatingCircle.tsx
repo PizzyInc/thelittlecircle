@@ -68,8 +68,9 @@ async function extractContent(cx: number, cy: number): Promise<{
   content: string;
   el: HTMLElement | null;
 }> {
-  // 1. Image at cursor position? Extension fetch can bypass CORS.
-  const hitEl = document.elementFromPoint(cx, cy);
+  // 1. Image at cursor position? Use elementsFromPoint to pierce through the shadow host.
+  const allEls = document.elementsFromPoint(cx, cy);
+  const hitEl = allEls.find((el) => el.id !== "tlc-shadow-host") ?? null;
   if (hitEl) {
     const imgEl =
       hitEl.tagName === "IMG"

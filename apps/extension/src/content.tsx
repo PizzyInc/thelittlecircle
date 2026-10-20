@@ -3,8 +3,11 @@ import { createRoot } from "react-dom/client";
 import FloatingCircle from "./circle/FloatingCircle";
 import { CIRCLE_STYLES } from "./styles";
 
-// Avoid double-injection
-if (!document.getElementById("tlc-shadow-host")) {
+// Remove any stale shadow host from a previous extension context, then re-inject fresh.
+const _stale = document.getElementById("tlc-shadow-host");
+if (_stale) _stale.remove();
+
+{
   const host = document.createElement("div");
   host.id = "tlc-shadow-host";
   // Full-viewport coverage so Chrome includes the shadow tree in hit-testing.
