@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import RantAI from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
@@ -13,13 +13,12 @@ function mock(pro = false): { verdict: Verdict; confidence: number; provider: st
   return { verdict, confidence: 62 + Math.floor(Math.random() * 33), provider: "mock" };
 }
 
-// Hive AI detection — handles both images (pass base64 data URL) and text (pass plain string)
-// Returns ai probability 0-1, or null if unavailable / failed
-async function hiveDetect(
+// Rantera — AI vs real signal for images and text
+async function ranteraDetect(
   type: "image" | "text",
   content: string,
 ): Promise<{ aiScore: number } | null> {
-  const apiKey = process.env.HIVE_AI_API_KEY;
+  const apiKey = process.env.RANTERA_API_KEY ?? process.env.HIVE_AI_API_KEY;
   if (!apiKey) return null;
 
   try {
@@ -27,7 +26,10 @@ async function hiveDetect(
       ? { image: { url: content } }
       : { text_data: content.slice(0, 3000) };
 
-    const res = await fetch("https://api.thehive.ai/api/v2/task/sync", {
+    const endpoint = process.env.RANTERA_ENDPOINT ?? process.env.RANTERA_DETECTION_URL ?? "";
+    if (!endpoint) return null;
+
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         Authorization: `Token ${apiKey}`,
@@ -53,16 +55,16 @@ async function hiveDetect(
   }
 }
 
-// Claude — used for fake-vs-real classification (Pro) and as full fallback
-async function claudeDetect(
+// Rant AI — fake-vs-real classification (Pro) and full fallback
+async function rantAIDetect(
   type: "text" | "image" | "audio" | "video",
   content: string,
   pro = false,
 ): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.RANT_AI_KEY ?? process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return mock(pro);
 
-  const client = new Anthropic({ apiKey });
+  const client = new RantAI({ apiKey });
 
   try {
     if (type === "text") {
@@ -100,7 +102,7 @@ ${content.slice(0, 3000)}`;
       const raw = (msg.content[0] as { text: string }).text.trim();
       const parsed = JSON.parse(raw.match(/\{.*\}/)?.[0] ?? raw);
       const verdict: Verdict = ["ai", "real", "fake"].includes(parsed.verdict) ? parsed.verdict : "real";
-      return { verdict, confidence: Number(parsed.confidence), provider: "claude" };
+      return { verdict, confidence: Number(parsed.confidence), provider: "rant-ai" };
     }
 
     if (type === "image") {
@@ -141,20 +143,20 @@ or
       const raw = (msg.content[0] as { text: string }).text.trim();
       const parsed = JSON.parse(raw.match(/\{.*\}/)?.[0] ?? raw);
       const verdict: Verdict = ["ai", "real", "fake"].includes(parsed.verdict) ? parsed.verdict : "real";
-      return { verdict, confidence: Number(parsed.confidence), provider: "claude" };
+      return { verdict, confidence: Number(parsed.confidence), provider: "rant-ai" };
     }
 
     return mock(pro);
   } catch (err) {
-    console.warn("Claude detection error:", err);
+    console.warn("Detection error:", err);
     return mock(pro);
   }
 }
 
 // Main detection logic:
-// - Hive handles AI vs real (accurate, fast, purpose-built)
-// - If Hive says "real" AND user is Pro, Claude does a fake check
-// - Falls back to full Claude pipeline if Hive is unavailable
+// - Rantera handles AI vs real (fast, accurate)
+// - If Rantera says "real" AND user is Pro, Rant AI checks for fake/misleading
+// - Falls back to full Rant AI pipeline if Rantera is unavailable
 async function detect(
   type: "text" | "image" | "audio" | "video",
   content: string,
@@ -162,35 +164,31 @@ async function detect(
 ): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
   if (type === "audio" || type === "video") return mock(pro);
 
-  const hiveType = type === "image" ? "image" : "text";
-  const hive = await hiveDetect(hiveType, content);
+  const ranteraType = type === "image" ? "image" : "text";
+  const rantera = await ranteraDetect(ranteraType, content);
 
-  if (!hive) {
-    // No Hive — fall back to Claude for everything
-    return claudeDetect(type, content, pro);
+  if (!rantera) {
+    return rantAIDetect(type, content, pro);
   }
 
-  // Hive returned a result
-  if (hive.aiScore > 0.5) {
-    const confidence = Math.round(hive.aiScore * 100);
-    return { verdict: "ai", confidence, provider: "hive" };
+  if (rantera.aiScore > 0.5) {
+    const confidence = Math.round(rantera.aiScore * 100);
+    return { verdict: "ai", confidence, provider: "rantera" };
   }
 
-  // Hive says not AI
   if (!pro) {
-    const confidence = Math.round((1 - hive.aiScore) * 100);
-    return { verdict: "real", confidence, provider: "hive" };
+    const confidence = Math.round((1 - rantera.aiScore) * 100);
+    return { verdict: "real", confidence, provider: "rantera" };
   }
 
-  // Pro user + Hive says not AI → run Claude to distinguish fake vs real
-  const claude = await claudeDetect(type, content, true);
-  // Trust Claude's verdict but use Hive confidence if Claude also says "real"
+  // Pro: Rantera says not AI → Rant AI checks for fake vs real
+  const rantAI = await rantAIDetect(type, content, true);
   return {
-    verdict: claude.verdict,
-    confidence: claude.verdict === "real"
-      ? Math.max(claude.confidence, Math.round((1 - hive.aiScore) * 100))
-      : claude.confidence,
-    provider: `hive+${claude.provider}`,
+    verdict: rantAI.verdict,
+    confidence: rantAI.verdict === "real"
+      ? Math.max(rantAI.confidence, Math.round((1 - rantera.aiScore) * 100))
+      : rantAI.confidence,
+    provider: "rantera",
   };
 }
 
