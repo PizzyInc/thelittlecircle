@@ -3,53 +3,7 @@ import CircleLogo from "@/components/CircleLogo";
 
 export const metadata = { title: "Install the Extension | The Little Circle" };
 
-const STEPS = [
-  {
-    n: 1,
-    title: "Download the extension",
-    body: "Click the button above to download the ZIP file.",
-  },
-  {
-    n: 2,
-    title: "Extract the ZIP",
-    body: 'Right-click the downloaded file and choose "Extract All…" (Windows) or double-click it (Mac). You\'ll get a folder called "dist".',
-  },
-  {
-    n: 3,
-    title: "Open Chrome Extensions",
-    body: (
-      <>
-        In Chrome, go to{" "}
-        <code
-          style={{
-            background: "#e0f2fe",
-            padding: "1px 6px",
-            borderRadius: 4,
-            fontSize: 12,
-          }}
-        >
-          chrome://extensions
-        </code>{" "}
-        in the address bar.
-      </>
-    ),
-  },
-  {
-    n: 4,
-    title: "Enable Developer Mode",
-    body: 'Toggle on "Developer mode" in the top-right corner of that page.',
-  },
-  {
-    n: 5,
-    title: 'Click "Load unpacked"',
-    body: 'A folder picker opens. Select the "dist" folder you just extracted.',
-  },
-  {
-    n: 6,
-    title: "Done!",
-    body: "The Little Circle icon appears in your Chrome toolbar. Click it to manage your circle, or tap the floating circle on any page to scan.",
-  },
-];
+const STORE_URL = "https://chromewebstore.google.com/detail/cepdgkicghnmgkmdhchbgkahcdoplogd";
 
 export default function DownloadPage() {
   return (
@@ -75,9 +29,7 @@ export default function DownloadPage() {
           }}
         >
           <CircleLogo size={28} />
-          <span
-            style={{ fontWeight: 700, fontSize: 15, color: "#0c4a6e" }}
-          >
+          <span style={{ fontWeight: 700, fontSize: 15, color: "#0c4a6e" }}>
             The Little Circle
           </span>
         </Link>
@@ -150,15 +102,15 @@ export default function DownloadPage() {
         </h1>
         <p style={{ fontSize: 14, color: "#0369a1", lineHeight: 1.6 }}>
           Your AI-detection companion, floating on every page in Chrome.
-          We&apos;re submitting to the Chrome Web Store soon.
-          Until then, install it in under a minute with the steps below.
+          Now available on the Chrome Web Store — one click to install.
         </p>
       </div>
 
-      {/* Download button */}
+      {/* Add to Chrome button */}
       <a
-        href="/the-little-circle-extension.zip"
-        download="the-little-circle-extension.zip"
+        href={STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -171,14 +123,13 @@ export default function DownloadPage() {
           fontWeight: 700,
           textDecoration: "none",
           boxShadow: "0 8px 24px rgba(14,165,233,0.4)",
-          marginBottom: 56,
-          transition: "transform 0.15s ease",
+          marginBottom: 40,
         }}
       >
-        ⬇ Download Extension ZIP
+        Add to Chrome — it&apos;s free
       </a>
 
-      {/* Steps */}
+      {/* Simple steps */}
       <div style={{ width: "100%", maxWidth: 560 }}>
         <h2
           style={{
@@ -191,11 +142,14 @@ export default function DownloadPage() {
             textAlign: "center",
           }}
         >
-          Installation steps
+          How it works
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {STEPS.map((step) => (
+          {[
+            { n: 1, title: "Click "Add to Chrome"", body: "Opens the Chrome Web Store listing. Click the blue "Add to Chrome" button and confirm." },
+            { n: 2, title: "Done!", body: "The Little Circle icon appears in your Chrome toolbar. The floating circle will show up on every website you visit." },
+          ].map((step) => (
             <div
               key={step.n}
               style={{
@@ -214,10 +168,10 @@ export default function DownloadPage() {
                   height: 32,
                   borderRadius: "50%",
                   background:
-                    step.n === 6
+                    step.n === 2
                       ? "linear-gradient(135deg, #d4f5e4, #b0ecc8)"
                       : "linear-gradient(135deg, #e0f2fe, #bae6fd)",
-                  color: step.n === 6 ? "#059669" : "#0369a1",
+                  color: step.n === 2 ? "#059669" : "#0369a1",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -226,7 +180,7 @@ export default function DownloadPage() {
                   flexShrink: 0,
                 }}
               >
-                {step.n === 6 ? "✓" : step.n}
+                {step.n === 2 ? "✓" : step.n}
               </div>
               <div>
                 <p

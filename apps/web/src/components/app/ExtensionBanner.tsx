@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 const DISMISS_KEY = "tlc_ext_banner_dismissed";
-const EXT_URL = process.env.NEXT_PUBLIC_EXTENSION_URL ?? "";
+const EXT_URL =
+  process.env.NEXT_PUBLIC_EXTENSION_URL ??
+  "https://chromewebstore.google.com/detail/cepdgkicghnmgkmdhchbgkahcdoplogd";
 
 export default function ExtensionBanner() {
   const [show, setShow] = useState(false);

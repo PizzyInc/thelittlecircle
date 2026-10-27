@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "How do I install the Chrome extension?",
-    a: "Visit thelittlecircle.com/download and click \"Get the Chrome Extension\". Once installed, the circle will appear on every website you visit.",
+    a: "Search for \"The Little Circle\" on the Chrome Web Store, or visit thelittlecircle.com/download and click \"Add to Chrome\". Once installed, the circle will appear on every website you visit.",
   },
   {
     q: "The circle isn't showing on a page — what do I do?",
