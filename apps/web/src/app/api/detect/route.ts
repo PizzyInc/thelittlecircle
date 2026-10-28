@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 type Verdict = "ai" | "real" | "fake";
 
@@ -155,35 +155,45 @@ or
   }
 }
 
-// Hive audio AI detection — sends the audio URL to Hive's audio endpoint
-async function hiveAudioDetect(
-  url: string,
-): Promise<{ aiScore: number } | null> {
-  const apiKey = process.env.RANTERA_API_KEY ?? process.env.HIVE_AI_API_KEY;
-  const endpoint = process.env.HIVE_AUDIO_ENDPOINT;
-  if (!apiKey || !endpoint) return null;
+// AI or Not audio detection — fetches the audio file and uploads it for analysis
+async function aiOrNotAudioDetect(
+  audioUrl: string,
+): Promise<{ verdict: "ai" | "real"; confidence: number } | null> {
+  const apiKey = process.env.AIORNOT_API_KEY;
+  if (!apiKey) return null;
 
   try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ url }),
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!res.ok) return null;
+    // Fetch the audio binary
+    const audioRes = await fetch(audioUrl, { signal: AbortSignal.timeout(10000) });
+    if (!audioRes.ok) return null;
+    const audioBuffer = await audioRes.arrayBuffer();
+    const contentType = audioRes.headers.get("content-type") ?? "audio/mpeg";
+    const ext = contentType.includes("wav") ? "wav" : contentType.includes("ogg") ? "ogg" : "mp3";
 
-    const data = await res.json();
-    const classes = data?.status?.[0]?.response?.output?.[0]?.classes as
-      | Array<{ class: string; score: number }>
-      | undefined;
-    if (!classes) return null;
+    // Try voice detection first, fall back to music
+    for (const endpoint of [
+      "https://api.aiornot.com/v1/reports/voice",
+      "https://api.aiornot.com/v1/reports/music",
+    ]) {
+      const form = new FormData();
+      form.append("file", new Blob([audioBuffer], { type: contentType }), `audio.${ext}`);
 
-    const aiScore = classes.find((c) => c.class === "ai_generated")?.score ?? 0;
-    return { aiScore };
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}` },
+        body: form,
+        signal: AbortSignal.timeout(45000),
+      });
+      if (!res.ok) continue;
+
+      const data = await res.json();
+      const verdict = data.report?.verdict as string | undefined;
+      const confidence = Math.round((data.report?.confidence ?? 0.5) * 100);
+
+      if (verdict === "ai") return { verdict: "ai", confidence: Math.max(confidence, 51) };
+      if (verdict === "human") return { verdict: "real", confidence: Math.max(confidence, 51) };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -201,17 +211,11 @@ async function detect(
   // Video: the extension captures a frame — analyze it as an image
   if (type === "video") return detect("image", content, pro);
 
-  // Audio: use Hive's audio AI detection endpoint
+  // Audio: use AI or Not for voice/music detection
   if (type === "audio") {
-    const hive = await hiveAudioDetect(content);
-    if (!hive) {
-      throw new Error("Audio detection coming soon");
-    }
-    const confidence = Math.round(hive.aiScore * 100);
-    if (hive.aiScore > 0.5) {
-      return { verdict: "ai", confidence: Math.max(confidence, 51), provider: "hive-audio" };
-    }
-    return { verdict: "real", confidence: Math.max(100 - confidence, 51), provider: "hive-audio" };
+    const result = await aiOrNotAudioDetect(content);
+    if (!result) throw new Error("Audio detection coming soon");
+    return { verdict: result.verdict, confidence: result.confidence, provider: "aiornot-audio" };
   }
 
   const ranteraType = type === "image" ? "image" : "text";
