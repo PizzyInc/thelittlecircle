@@ -155,6 +155,40 @@ or
   }
 }
 
+// Hive audio AI detection — sends the audio URL to Hive's audio endpoint
+async function hiveAudioDetect(
+  url: string,
+): Promise<{ aiScore: number } | null> {
+  const apiKey = process.env.RANTERA_API_KEY ?? process.env.HIVE_AI_API_KEY;
+  const endpoint = process.env.HIVE_AUDIO_ENDPOINT;
+  if (!apiKey || !endpoint) return null;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${apiKey}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ url }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const classes = data?.status?.[0]?.response?.output?.[0]?.classes as
+      | Array<{ class: string; score: number }>
+      | undefined;
+    if (!classes) return null;
+
+    const aiScore = classes.find((c) => c.class === "ai_generated")?.score ?? 0;
+    return { aiScore };
+  } catch {
+    return null;
+  }
+}
+
 // Main detection logic:
 // - Rantera handles AI vs real (fast, accurate)
 // - If Rantera says "real" AND user is Pro, Rant AI checks for fake/misleading
@@ -164,7 +198,22 @@ async function detect(
   content: string,
   pro = false,
 ): Promise<{ verdict: Verdict; confidence: number; provider: string }> {
-  if (type === "audio" || type === "video") return mock(pro);
+  // Video: the extension captures a frame — analyze it as an image
+  if (type === "video") return detect("image", content, pro);
+
+  // Audio: use Hive's audio AI detection endpoint
+  if (type === "audio") {
+    const hive = await hiveAudioDetect(content);
+    if (!hive) {
+      // HIVE_AUDIO_ENDPOINT not configured — tell the user rather than faking it
+      throw new Error("Audio detection unavailable");
+    }
+    const confidence = Math.round(hive.aiScore * 100);
+    if (hive.aiScore > 0.5) {
+      return { verdict: "ai", confidence: Math.max(confidence, 51), provider: "hive-audio" };
+    }
+    return { verdict: "real", confidence: Math.max(100 - confidence, 51), provider: "hive-audio" };
+  }
 
   const ranteraType = type === "image" ? "image" : "text";
   const rantera = await ranteraDetect(ranteraType, content);

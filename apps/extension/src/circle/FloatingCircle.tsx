@@ -64,14 +64,47 @@ function setStorage(key: string, value: unknown) {
 }
 
 async function extractContent(cx: number, cy: number): Promise<{
-  type: "text" | "image";
+  type: "text" | "image" | "video" | "audio";
   content: string;
   el: HTMLElement | null;
 }> {
-  // 1. Image at cursor position? Use elementsFromPoint to pierce through the shadow host.
   const allEls = document.elementsFromPoint(cx, cy);
   const hitEl = allEls.find((el) => el.id !== "tlc-shadow-host") ?? null;
+
   if (hitEl) {
+    // 1. Video — capture the current frame via canvas
+    const videoEl =
+      hitEl.tagName === "VIDEO"
+        ? (hitEl as HTMLVideoElement)
+        : (hitEl.closest("video") as HTMLVideoElement | null);
+    if (videoEl && videoEl.readyState >= 2) {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = videoEl.videoWidth || 640;
+        canvas.height = videoEl.videoHeight || 360;
+        ;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL("image/jpeg", 0.85);
+        if (base64.length > 200) {
+          return { type: "video", content: base64, el: videoEl };
+        }
+      } catch { /* cross-origin video — fall through */ }
+    }
+
+    // 2. Audio — send the src URL for server-side analysis
+    const audioEl =
+      hitEl.tagName === "AUDIO"
+        ? (hitEl as HTMLAudioElement)
+        : (hitEl.closest("audio") as HTMLAudioElement | null);
+    if (audioEl) {
+      const src = audioEl.src || (audioEl.querySelector("source") as HTMLSourceElement | null)?.src || "";
+      if (src && /^https?:/.test(src)) {
+        return { type: "audio", content: src, el: audioEl };
+      }
+    }
+
+    // 3. Image — fetch and encode as base64
     const imgEl =
       hitEl.tagName === "IMG"
         ? (hitEl as HTMLImageElement)
@@ -91,7 +124,7 @@ async function extractContent(cx: number, cy: number): Promise<{
     }
   }
 
-  // 2. Pull main content text — prefer article/main over full body
+  // 4. Text — prefer article/main over full body
   const container = (
     document.querySelector("article") ??
     document.querySelector('[role="main"]') ??
@@ -340,8 +373,12 @@ export default function FloatingCircle() {
       setState("idle");
       scanningRef.current = false;
       const isAbort = err instanceof Error && err.name === "AbortError";
+      const isNetwork = err instanceof TypeError;
       if (!isAbort) console.warn("[TLC] detection error:", err);
-      setBubble({ verdict: "info", message: isAbort ? "Timed out — try again" : "Couldn't connect — try again" });
+      const msg = isAbort ? "Timed out — try again"
+        : isNetwork ? "Couldn't connect — try again"
+        : (err instanceof Error ? err.message : "Couldn't connect — try again");
+      setBubble({ verdict: "info", message: msg });
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       bubbleTimer.current = setTimeout(() => setBubble(null), 4000);
     }
