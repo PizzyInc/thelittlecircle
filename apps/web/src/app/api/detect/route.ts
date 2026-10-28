@@ -205,8 +205,7 @@ async function detect(
   if (type === "audio") {
     const hive = await hiveAudioDetect(content);
     if (!hive) {
-      // HIVE_AUDIO_ENDPOINT not configured — tell the user rather than faking it
-      throw new Error("Audio detection unavailable");
+      throw new Error("Audio detection coming soon");
     }
     const confidence = Math.round(hive.aiScore * 100);
     if (hive.aiScore > 0.5) {
@@ -313,6 +312,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ verdict: result.verdict, confidence: result.confidence }, { headers: CORS });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : null;
+    if (msg === "Audio detection coming soon") {
+      return NextResponse.json({ error: msg }, { status: 422, headers: CORS });
+    }
     console.error("Detection error:", err);
     return NextResponse.json({ error: "Detection failed. Try again." }, { status: 500, headers: CORS });
   }
