@@ -147,7 +147,7 @@ export default function DownloadPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {[
-            { n: 1, title: "Click "Add to Chrome"", body: "Opens the Chrome Web Store listing. Click the blue "Add to Chrome" button and confirm." },
+            { n: 1, title: 'Click "Add to Chrome"', body: 'Opens the Chrome Web Store listing. Click the blue "Add to Chrome" button and confirm.' },
             { n: 2, title: "Done!", body: "The Little Circle icon appears in your Chrome toolbar. The floating circle will show up on every website you visit." },
           ].map((step) => (
             <div
