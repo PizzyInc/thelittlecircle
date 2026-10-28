@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "The Little Circle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Your AI-detection companion — floating on every page.",
   "permissions": ["storage", "scripting", "tabs"],
   "host_permissions": ["<all_urls>"],
