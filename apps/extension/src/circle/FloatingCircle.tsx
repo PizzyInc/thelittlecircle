@@ -4,7 +4,7 @@ const SIZE = 56;
 const MARGIN = 16;
 const TAP_MAX_MS = 250;
 const TAP_MAX_PX = 6;
-const API_URL = "https://thelittlecircle.com/api/detect";
+const API_URL = "https://www.thelittlecircle.com/api/detect";
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
