@@ -43,7 +43,9 @@ export default function Footer() {
               <p className="text-sky-700 text-xs font-semibold uppercase tracking-widest mb-4">Support</p>
               <ul className="space-y-3">
                 <li><Link href="/faq" className="text-sm text-sky-500 hover:text-sky-800 transition-colors">FAQ</Link></li>
+                <li><Link href="/support" className="text-sm text-sky-500 hover:text-sky-800 transition-colors">Support</Link></li>
                 <li><a href="mailto:hello@thelittlecircle.com" className="text-sm text-sky-500 hover:text-sky-800 transition-colors">Contact</a></li>
+                <li><Link href="/account/delete" className="text-sm text-sky-500 hover:text-sky-800 transition-colors">Delete account</Link></li>
               </ul>
             </div>
           </div>
